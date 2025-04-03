@@ -258,14 +258,36 @@
             max-height: 1000px;
         }
 
+        /* Updated Note Content Style to match process-instructions */
         .note-content {
             width: 100%;
             min-height: 120px;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            resize: vertical;
             font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-y: auto;
+            background-color: white;
+            resize: vertical;
+        }
+
+        /* Content-editable version */
+        .note-content[contenteditable="true"] {
+            outline: none;
+        }
+
+        .note-content[contenteditable="true"]:empty:before {
+            content: attr(placeholder);
+            color: #999;
+            pointer-events: none;
+            display: block;
+        }
+
+        .note-content[contenteditable="true"]:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 1px #1a73e8;
         }
 
         .delete-btn {
@@ -589,7 +611,8 @@
                 <button onclick="addNote()">Add Note</button>
                 
                 <div class="notes-container">
-                    <textarea id="noteContent" class="large-notes" placeholder="Note content..."></textarea>
+                    <!-- Updated to use contenteditable div instead of textarea -->
+                    <div id="noteContent" class="note-content" contenteditable="true" placeholder="Note content..."></div>
                 </div>
             </div>
             
@@ -861,7 +884,7 @@
                 id: Date.now(),
                 title: document.getElementById('noteTitle').value.trim(),
                 date: document.getElementById('noteDate').value,
-                content: document.getElementById('noteContent').value,
+                content: document.getElementById('noteContent').innerHTML,
                 created: new Date().toISOString(),
                 updated: new Date().toISOString(),
                 subheading: noteSubheadings[0]
@@ -915,10 +938,11 @@
                     Content
                 </div>
                 <div class="notes-content">
-                    <textarea class="note-content" oninput="updateNoteField(${note.id}, 'content', this.value)"
-                              style="width:100%; min-height: 120px;">
+                    <div class="note-content" contenteditable="true" 
+                         oninput="updateNoteField(${note.id}, 'content', this.innerHTML)"
+                         placeholder="Note content...">
                         ${note.content}
-                    </textarea>
+                    </div>
                 </div>
                 <div class="move-buttons">
                     <button onclick="moveNote(${note.id}, 'up')">↑</button>
@@ -1014,7 +1038,7 @@
         function clearNoteForm() {
             document.getElementById('noteTitle').value = '';
             document.getElementById('noteDate').value = '';
-            document.getElementById('noteContent').value = '';
+            document.getElementById('noteContent').innerHTML = '';
         }
 
         // Initialization
