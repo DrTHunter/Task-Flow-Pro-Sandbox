@@ -238,6 +238,7 @@
             position: relative;
         }
 
+        /* Updated Notes Header and Content Styles */
         .notes-header {
             display: flex;
             align-items: center;
@@ -258,7 +259,6 @@
             max-height: 1000px;
         }
 
-        /* Updated Note Content Style to match process-instructions */
         .note-content {
             width: 100%;
             min-height: 120px;
@@ -270,10 +270,8 @@
             word-wrap: break-word;
             overflow-y: auto;
             background-color: white;
-            resize: vertical;
         }
 
-        /* Content-editable version */
         .note-content[contenteditable="true"] {
             outline: none;
         }
@@ -321,16 +319,6 @@
             margin-top: 15px;
         }
         
-        .large-notes {
-            width: 100%;
-            min-height: 150px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            resize: vertical;
-            font-size: 14px;
-        }
-
         .subheading {
             background-color: #e0e0e0;
             padding: 5px 10px;
@@ -422,8 +410,8 @@
         .note-title {
             font-weight: bold;
             font-size: 16px;
-            width: 65%;     /* Now this will work... */
-            flex: none;     /* ...because we disabled flex growth */
+            flex: 1;
+            width: 50%;
         }
 
         .note-date {
@@ -432,7 +420,6 @@
             margin-left: 10px;
         }
 
-        /* Note title and date input */
         .note-title-input-container {
             display: flex;
             align-items: center;
@@ -611,7 +598,6 @@
                 <button onclick="addNote()">Add Note</button>
                 
                 <div class="notes-container">
-                    <!-- Updated to use contenteditable div instead of textarea -->
                     <div id="noteContent" class="note-content" contenteditable="true" placeholder="Note content..."></div>
                 </div>
             </div>
@@ -798,6 +784,56 @@
             });
         }
 
+        function createNoteElement(note) {
+            const noteElement = document.createElement('div');
+            noteElement.className = 'note-item';
+            noteElement.setAttribute('data-id', note.id);
+            
+            // Subheading selector
+            const subheadingOptions = noteSubheadings.map(sh => 
+                `<option value="${sh}" ${note.subheading === sh ? 'selected' : ''}>${sh}</option>`
+            ).join('');
+
+            noteElement.innerHTML = `
+                <div class="note-header">
+                    <div style="display: flex; align-items: center; flex-grow: 1;">
+                        <span class="note-title" contenteditable="true" 
+                              oninput="updateNoteField(${note.id}, 'title', this.innerText)">
+                            ${note.title}
+                        </span>
+                        <span class="note-date">
+                            ${note.date ? formatDate(note.date) : 'No date'}
+                        </span>
+                    </div>
+                    <div class="task-controls">
+                        <button class="delete-btn" onclick="confirmDelete('note', ${note.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="note-subheading-selector">
+                    <select onchange="updateNoteField(${note.id}, 'subheading', this.value)">
+                        ${subheadingOptions}
+                    </select>
+                </div>
+                <div class="notes-header" onclick="toggleNotes(this)">
+                    Content
+                </div>
+                <div class="notes-content">
+                    <div class="note-content" contenteditable="true" 
+                         oninput="updateNoteField(${note.id}, 'content', this.innerHTML)"
+                         placeholder="Note content...">
+                        ${note.content}
+                    </div>
+                </div>
+                <div class="move-buttons">
+                    <button onclick="moveNote(${note.id}, 'up')">↑</button>
+                    <button onclick="moveNote(${note.id}, 'down')">↓</button>
+                </div>
+            `;
+            return noteElement;
+        }
+
         function moveSubheading(type, index, direction) {
             const subheadings = noteSubheadings;
             
@@ -902,56 +938,6 @@
             renderSubheadings('note');
         }
 
-        function createNoteElement(note) {
-            const noteElement = document.createElement('div');
-            noteElement.className = 'note-item';
-            noteElement.setAttribute('data-id', note.id);
-            
-            // Subheading selector
-            const subheadingOptions = noteSubheadings.map(sh => 
-                `<option value="${sh}" ${note.subheading === sh ? 'selected' : ''}>${sh}</option>`
-            ).join('');
-
-            noteElement.innerHTML = `
-                <div class="note-header">
-                    <div style="display: flex; align-items: center; flex-grow: 1;">
-                        <span class="note-title" contenteditable="true" 
-                              oninput="updateNoteField(${note.id}, 'title', this.innerText)">
-                            ${note.title}
-                        </span>
-                        <span class="note-date">
-                            ${note.date ? formatDate(note.date) : 'No date'}
-                        </span>
-                    </div>
-                    <div class="task-controls">
-                        <button class="delete-btn" onclick="confirmDelete('note', ${note.id})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="note-subheading-selector">
-                    <select onchange="updateNoteField(${note.id}, 'subheading', this.value)">
-                        ${subheadingOptions}
-                    </select>
-                </div>
-                <div class="notes-header" onclick="toggleNotes(this)">
-                    Content
-                </div>
-                <div class="notes-content">
-                    <div class="note-content" contenteditable="true" 
-                         oninput="updateNoteField(${note.id}, 'content', this.innerHTML)"
-                         placeholder="Note content...">
-                        ${note.content}
-                    </div>
-                </div>
-                <div class="move-buttons">
-                    <button onclick="moveNote(${note.id}, 'up')">↑</button>
-                    <button onclick="moveNote(${note.id}, 'down')">↓</button>
-                </div>
-            `;
-            return noteElement;
-        }
-
         function moveNote(id, direction) {
             const index = notes.findIndex(n => n.id === id);
             if (direction === 'up' && index > 0) {
@@ -990,9 +976,6 @@
                 saveNotes();
                 if (field === 'subheading') {
                     renderNotes();
-                }
-                if (field === 'title') {
-                    // Update might be needed for sidebar if it existed
                 }
             }
         }
