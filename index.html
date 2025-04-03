@@ -318,18 +318,20 @@
             overflow: hidden;
         }
 
-        .process-instructions {
+        .current-step {
             width: 100%;
             min-height: 120px;
+            max-height: 200px;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            resize: none;
             font-size: 13px;
             white-space: pre-wrap;
             word-wrap: break-word;
             overflow-y: auto;
             background-color: white;
-            outline: none;
+            line-height: 1.4;
         }
 
         .task-meta {
@@ -682,7 +684,7 @@
                 width: 100%;
             }
             
-            .process-instructions {
+            .current-step {
                 width: 100% !important;
             }
         }
@@ -884,31 +886,16 @@
 
         // Task Management Scripts
         // Data Management
-        let tasks = JSON.parse(localStorage.getItem('tasks')) || [
-            {
-                id: Date.now(),
-                title: "Sample Task",
-                start: new Date().toISOString().split('T')[0],
-                due: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-                priority: "medium",
-                priorityValue: 3,
-                notes: "This is a sample task",
-                currentStep: "",
-                completed: false,
-                created: new Date().toISOString(),
-                subheading: "General",
-                color: "#1a73e8"
-            }
-        ];
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         let selectedPriority = 1;
         let selectedColor = '#1a73e8';
-        let taskSubheadings = JSON.parse(localStorage.getItem('taskSubheadings')) || ['General', 'Work', 'Personal'];
+        let taskSubheadings = JSON.parse(localStorage.getItem('taskSubheadings')) || ['General'];
         let collapsedSubheadings = JSON.parse(localStorage.getItem('collapsedSubheadings')) || {};
 
-        // Auto-resize div function
-        function autoResizeDiv(div) {
-            div.style.height = 'auto';
-            div.style.height = (div.scrollHeight) + 'px';
+        // Auto-resize textarea function
+        function autoResizeTextarea(textarea) {
+            textarea.style.height = 'auto'; // Reset height
+            textarea.style.height = (textarea.scrollHeight) + 'px';
         }
 
         // Toggle settings menu
@@ -935,23 +922,8 @@
         function resetAllData() {
             if (confirm('Are you sure you want to delete ALL data? This cannot be undone.')) {
                 localStorage.clear();
-                tasks = [
-                    {
-                        id: Date.now(),
-                        title: "Sample Task",
-                        start: new Date().toISOString().split('T')[0],
-                        due: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-                        priority: "medium",
-                        priorityValue: 3,
-                        notes: "This is a sample task",
-                        currentStep: "",
-                        completed: false,
-                        created: new Date().toISOString(),
-                        subheading: "General",
-                        color: "#1a73e8"
-                    }
-                ];
-                taskSubheadings = ['General', 'Work', 'Personal'];
+                tasks = [];
+                taskSubheadings = ['General'];
                 collapsedSubheadings = {};
                 
                 saveAllData();
@@ -960,116 +932,148 @@
         }
 
         function saveAllData() {
-            try {
-                localStorage.setItem('tasks', JSON.stringify(tasks));
-                localStorage.setItem('taskSubheadings', JSON.stringify(taskSubheadings));
-                localStorage.setItem('collapsedSubheadings', JSON.stringify(collapsedSubheadings));
-            } catch (e) {
-                console.error('Failed to save data:', e);
-            }
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('taskSubheadings', JSON.stringify(taskSubheadings));
+            localStorage.setItem('collapsedSubheadings', JSON.stringify(collapsedSubheadings));
         }
 
         // Subheading functions
         function renderSubheadings(type) {
-            const currentList = document.getElementById('currentList');
-            const doneList = document.getElementById('doneList');
+            const listContainer = document.getElementById('tasksList');
             
-            // Clear existing content but keep the headers
-            currentList.innerHTML = '';
-            doneList.innerHTML = '';
+            // Clear the containers
+            listContainer.innerHTML = '<h3 class="current-header">Current Tasks</h3><div id="currentList"></div><h3 class="completed-header">Completed Tasks</h3><div id="doneList"></div>';
             
-            // Group tasks by subheading
-            const groupedTasks = {};
-            tasks.forEach(task => {
-                if (!groupedTasks[task.subheading]) {
-                    groupedTasks[task.subheading] = { current: [], completed: [] };
-                }
-                if (task.completed) {
-                    groupedTasks[task.subheading].completed.push(task);
-                } else {
-                    groupedTasks[task.subheading].current.push(task);
-                }
+            taskSubheadings.forEach((subheading, index) => {
+                // Render items for this subheading in the list container
+                renderItemsForSubheading(type, subheading, listContainer, index);
             });
-            
-            // Render current tasks by subheading
-            for (const [subheading, group] of Object.entries(groupedTasks)) {
-                if (group.current.length > 0) {
-                    const subheadingElement = createSubheadingElement(subheading, type, false);
-                    currentList.appendChild(subheadingElement);
-                    
-                    const content = document.createElement('div');
-                    content.className = `collapsible-content ${collapsedSubheadings[`${type}-${subheading}`] ? 'collapsed' : ''}`;
-                    
-                    group.current.forEach(task => {
-                        content.appendChild(createTaskElement(task));
-                    });
-                    
-                    currentList.appendChild(content);
-                }
-                
-                if (group.completed.length > 0) {
-                    const completedHeader = document.createElement('div');
-                    completedHeader.className = 'subheading';
-                    completedHeader.textContent = `${subheading} - Completed`;
-                    completedHeader.onclick = () => {
-                        const key = `${type}-${subheading}-completed`;
-                        collapsedSubheadings[key] = !collapsedSubheadings[key];
-                        localStorage.setItem('collapsedSubheadings', JSON.stringify(collapsedSubheadings));
-                        completedHeader.nextElementSibling.classList.toggle('collapsed');
-                    };
-                    
-                    doneList.appendChild(completedHeader);
-                    
-                    const completedContent = document.createElement('div');
-                    completedContent.className = `collapsible-content ${collapsedSubheadings[`${type}-${subheading}-completed`] ? 'collapsed' : ''}`;
-                    
-                    group.completed.forEach(task => {
-                        completedContent.appendChild(createTaskElement(task));
-                    });
-                    
-                    doneList.appendChild(completedContent);
-                }
-            }
         }
 
-        function createSubheadingElement(subheading, type, isCompleted) {
+        function renderItemsForSubheading(type, subheading, container, index) {
+            let items = tasks.filter(t => t.subheading === subheading);
+            
+            if (items.length === 0) return;
+            
+            // Check if this subheading is collapsed
+            const isCollapsed = collapsedSubheadings[`${type}-${subheading}`] || false;
+            
+            // Add subheading label
             const subheadingElement = document.createElement('div');
             subheadingElement.className = 'subheading';
+            subheadingElement.onclick = (e) => {
+                // Don't toggle if clicking on controls
+                if (e.target.closest('.subheading-controls')) return;
+                
+                const key = `${type}-${subheading}`;
+                collapsedSubheadings[key] = !collapsedSubheadings[key];
+                localStorage.setItem('collapsedSubheadings', JSON.stringify(collapsedSubheadings));
+                
+                const content = subheadingElement.nextElementSibling;
+                content.classList.toggle('collapsed');
+            };
             
             const input = document.createElement('input');
             input.className = 'subheading-input';
             input.value = subheading;
             input.placeholder = 'Subheading name';
-            input.onchange = (e) => {
-                const newValue = e.target.value;
-                // Update all tasks with this subheading
-                tasks.forEach(task => {
-                    if (task.subheading === subheading) {
-                        task.subheading = newValue;
-                    }
-                });
-                saveTasks();
-                renderSubheadings(type);
+            input.onchange = () => updateSubheading(type, index, input.value);
+            
+            const controls = document.createElement('div');
+            controls.className = 'subheading-controls';
+            
+            const upBtn = document.createElement('button');
+            upBtn.innerHTML = '↑';
+            upBtn.style.padding = '2px 5px';
+            upBtn.onclick = (e) => {
+                e.stopPropagation();
+                moveSubheading(type, index, 'up');
             };
+            upBtn.disabled = index === 0;
+            
+            const downBtn = document.createElement('button');
+            downBtn.innerHTML = '↓';
+            downBtn.style.padding = '2px 5px';
+            downBtn.onclick = (e) => {
+                e.stopPropagation();
+                moveSubheading(type, index, 'down');
+            };
+            downBtn.disabled = index === taskSubheadings.length - 1;
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.innerHTML = '×';
+            removeBtn.style.padding = '2px 5px';
+            removeBtn.style.backgroundColor = '#dc3545';
+            removeBtn.onclick = (e) => {
+                e.stopPropagation();
+                removeSubheading(type, index);
+            };
+            removeBtn.disabled = taskSubheadings.length <= 1;
+            
+            controls.appendChild(upBtn);
+            controls.appendChild(downBtn);
+            controls.appendChild(removeBtn);
             
             subheadingElement.appendChild(input);
-            return subheadingElement;
+            subheadingElement.appendChild(controls);
+            
+            // Create content container
+            const contentContainer = document.createElement('div');
+            contentContainer.className = `collapsible-content ${isCollapsed ? 'collapsed' : ''}`;
+            
+            // For tasks, we need to add to either current or completed list
+            const currentItems = items.filter(t => !t.completed);
+            const completedItems = items.filter(t => t.completed);
+            
+            if (currentItems.length > 0) {
+                const currentContainer = document.getElementById('currentList');
+                currentContainer.appendChild(subheadingElement.cloneNode(true));
+                const currentContent = document.createElement('div');
+                currentContent.className = `collapsible-content ${isCollapsed ? 'collapsed' : ''}`;
+                
+                currentItems.forEach(task => {
+                    const taskElement = createTaskElement(task);
+                    currentContent.appendChild(taskElement);
+                });
+                
+                currentContainer.appendChild(currentContent);
+            }
+            
+            if (completedItems.length > 0) {
+                const completedHeader = document.createElement('div');
+                completedHeader.className = 'subheading';
+                completedHeader.textContent = `${subheading} - Completed`;
+                completedHeader.onclick = (e) => {
+                    if (e.target.closest('.subheading-controls')) return;
+                    const key = `${type}-${subheading}-completed`;
+                    collapsedSubheadings[key] = !collapsedSubheadings[key];
+                    localStorage.setItem('collapsedSubheadings', JSON.stringify(collapsedSubheadings));
+                    
+                    const content = completedHeader.nextElementSibling;
+                    content.classList.toggle('collapsed');
+                };
+                
+                document.getElementById('doneList').appendChild(completedHeader);
+                const completedContent = document.createElement('div');
+                completedContent.className = `collapsible-content ${collapsedSubheadings[`${type}-${subheading}-completed`] ? 'collapsed' : ''}`;
+                
+                completedItems.forEach(task => {
+                    const taskElement = createTaskElement(task);
+                    completedContent.appendChild(taskElement);
+                });
+                
+                document.getElementById('doneList').appendChild(completedContent);
+            }
         }
 
         function moveSubheading(type, index, direction) {
             if (direction === 'up' && index > 0) {
-                // Swap the subheadings
                 [taskSubheadings[index], taskSubheadings[index - 1]] = [taskSubheadings[index - 1], taskSubheadings[index]];
             } else if (direction === 'down' && index < taskSubheadings.length - 1) {
-                // Swap the subheadings
                 [taskSubheadings[index], taskSubheadings[index + 1]] = [taskSubheadings[index + 1], taskSubheadings[index]];
             }
             
-            // Save both the subheadings and tasks
             saveSubheadings(type);
-            saveTasks();
-            
-            // Re-render everything
             renderSubheadings(type);
         }
 
@@ -1506,28 +1510,12 @@
         }
 
         // Storage
-        function saveTasks() { 
-            try {
-                localStorage.setItem('tasks', JSON.stringify(tasks));
-            } catch (e) {
-                console.error('Failed to save tasks:', e);
-            }
-        }
+        function saveTasks() { localStorage.setItem('tasks', JSON.stringify(tasks)); }
 
         // Initialization
         window.onload = () => {
             setupStarRating();
-            
-            // Initialize with some default subheadings if none exist
-            if (taskSubheadings.length === 0) {
-                taskSubheadings = ['General', 'Work', 'Personal'];
-                saveSubheadings('task');
-            }
-            
             renderTasks();
-            
-            // Make sure we're showing the correct tab
-            showTab('tasks');
             
             // Collapse all input sections by default
             document.querySelectorAll('.input-section').forEach(section => {
