@@ -3,1527 +3,1652 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Management System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Pomodoro Timer</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* === Base Styles === */
+        :root {
+            --primary-pink: #e91e63;
+            --primary-green: #4caf50;
+            --primary-purple: #9c27b0;
+            --primary-blue: #2196f3;
+            --primary-orange: #ff9800;
+            --accent-purple: #673ab7;
+            --background-gradient-1: #ffebee;
+            --background-gradient-2: #e8f5e9;
+            --background-gradient-3: #e3f2fd;
+            --background-gradient-4: #f3e5f5;
+            --work-bg: #ffebee;
+            --break-bg: #e8f5e9;
+            --work-text: #e91e63;
+            --break-text: #4caf50;
         }
 
         body {
-            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
-        }
-
-        /* Sidebar Styles */
-        .sidebar {
-            width: 70px;
-            background-color: #2a3647;
-            color: white;
-            min-height: 100vh;
-            padding: 20px 0;
-            transition: all 0.3s ease;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
-
-        .sidebar:hover {
-            width: 250px;
-            align-items: flex-start;
-            padding-left: 20px;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 40px;
-            width: 100%;
-            justify-content: center;
-        }
-
-        .sidebar:hover .logo-container {
-            justify-content: flex-start;
-            padding-left: 10px;
-        }
-
-        .logo {
-            width: 40px;
-            height: 40px;
-            background-color: #1a2533;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: bold;
-            color: #fff;
-        }
-
-        .logo-text {
-            margin-left: 15px;
-            font-size: 18px;
-            font-weight: 600;
-            display: none;
-        }
-
-        .sidebar:hover .logo-text {
-            display: block;
-        }
-
-        .nav-menu {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            margin-bottom: 5px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: calc(100% - 10px);
-            color: #d1d5db;
-        }
-
-        .menu-item:hover {
-            background-color: #1a2533;
-            color: white;
-        }
-
-        .menu-item.active {
-            background-color: #1a2533;
-            color: white;
-        }
-
-        .menu-icon {
-            font-size: 18px;
-            min-width: 30px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .menu-text {
-            margin-left: 10px;
-            font-size: 14px;
-            font-weight: 500;
-            display: none;
-            white-space: nowrap;
-        }
-
-        .sidebar:hover .menu-text {
-            display: block;
-        }
-
-        .menu-chevron {
-            margin-left: auto;
-            font-size: 12px;
-            transition: transform 0.3s;
-            display: none;
-        }
-
-        .sidebar:hover .menu-chevron {
-            display: block;
-        }
-
-        .menu-item.active .menu-chevron {
-            transform: rotate(180deg);
-        }
-
-        .divider {
-            height: 1px;
-            background-color: #3e4b5e;
-            margin: 20px 0;
-            width: 80%;
-        }
-
-        /* Main Content Styles */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: white;
-        }
-
-        .content-header {
-            padding: 15px 20px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .content-title {
-            font-size: 18px;
-            font-weight: 600;
+            height: auto;
+            margin: 0;
             color: #333;
+            overflow-y: auto;
+            background: linear-gradient(-45deg, 
+                var(--background-gradient-1),
+                var(--background-gradient-2),
+                var(--background-gradient-3),
+                var(--background-gradient-4));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            transition: background-color 0.5s ease;
         }
 
-        .tab-content {
-            display: none;
-            padding: 0;
-            flex: 1;
-            overflow-y: visible;
+        body.work-mode {
+            background-color: var(--work-bg);
+            animation: none;
         }
 
-        .tab-content.active {
+        body.break-mode {
+            background-color: var(--break-bg);
+            animation: none;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; background-color: var(--background-gradient-1); }
+            25% { background-color: var(--background-gradient-2); }
+            50% { background-position: 100% 50%; background-color: var(--background-gradient-3); }
+            75% { background-color: var(--background-gradient-4); }
+            100% { background-position: 0% 50%; background-color: var(--background-gradient-1); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .animal-side {
+            position: fixed;
+            top: 45%;
+            transform: translateY(-50%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .animal-left { 
+            left: 10px;
+            animation: floatLeft 15s ease-in-out infinite alternate;
+        }
+
+        .animal-right { 
+            right: 10px;
+            animation: floatRight 15s ease-in-out infinite alternate;
+        }
+
+        .animal-gif {
+            width: 160px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(3deg); }
+        }
+
+        @keyframes floatLeft {
+            0% { transform: translateY(-50%) translateX(0); }
+            100% { transform: translateY(-50%) translateX(20px); }
+        }
+
+        @keyframes floatRight {
+            0% { transform: translateY(-50%) translateX(0); }
+            100% { transform: translateY(-50%) translateX(-20px); }
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 900px;
+            width: 90%;
+            backdrop-filter: blur(5px);
+            position: relative;
+            z-index: 2;
+            margin: 30px 0;
+        }
+
+        h1 {
+            color: var(--primary-pink);
+            margin-top: 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+        }
+
+        .header-buttons {
             display: flex;
-            flex-direction: column;
-        }
-
-        /* Task Management Styles */
-        .input-section {
-            display: flex;
-            flex-wrap: wrap;
+            justify-content: center;
             gap: 10px;
             margin-bottom: 15px;
-            transition: all 0.3s ease;
-            overflow: hidden;
-            align-items: flex-end;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 15px;
-            margin: 15px;
         }
 
-        .input-section.collapsed {
-            max-height: 0;
-            margin-bottom: 0;
-            opacity: 0;
-            visibility: hidden;
-            border-bottom: none;
-            padding-bottom: 0;
+        .timer-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
         }
 
-        .wide-input-section {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: flex-end;
-        }
-
-        .wide-input-section .input-group:first-child {
-            flex: 3;
-            min-width: 300px;
-        }
-
-        .wide-input-section .input-group:not(:first-child) {
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .wide-input-section button {
-            margin-left: auto;
-            height: 36px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            min-width: 150px;
-        }
-
-        .input-group label {
-            font-size: 12px;
-            margin-bottom: 4px;
-            color: #555;
-        }
-
-        input, select, textarea {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
+        .timer-display {
+            font-size: 5em;
+            font-weight: bold;
+            color: var(--primary-purple);
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1);
+            font-family: 'Courier New', monospace;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            transition: none;
             width: 100%;
+            text-align: center;
+        }
+
+        .timer-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary-blue) 0%, transparent 0%);
+            z-index: 1;
+        }
+
+        .timer-circle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 10px solid rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         button {
-            padding: 8px 15px;
-            background-color: #1a73e8;
-            color: white;
+            padding: 12px 25px;
+            font-size: 1.1em;
             border: none;
-            border-radius: 4px;
+            border-radius: 50px;
             cursor: pointer;
-            transition: filter 0.3s;
-            font-size: 13px;
-            height: fit-content;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         button:hover {
-            filter: brightness(0.9);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
-        .task-list {
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 15px;
-            flex: 1;
-        }
+        #start { background-color: var(--primary-green); color: white; }
+        #pause { background-color: var(--primary-orange); color: white; display: none; }
+        #stop { background-color: #f44336; color: white; display: none; }
+        #reset { background-color: var(--primary-blue); color: white; }
 
-        .task-item {
-            padding: 12px;
-            background-color: white;
-            margin-bottom: 8px;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            position: relative;
-        }
-
-        .priority-high { border-left: 4px solid #dc3545; }
-        .priority-medium { border-left: 4px solid #ffc107; }
-        .priority-low { border-left: 4px solid #28a745; }
-
-        .completed {
-            opacity: 0.7;
-            background-color: #f8f9fa;
-        }
-
-        .task-header {
+        .quick-buttons {
             display: flex;
-            align-items: center;
-            margin-bottom: 10px;
+            justify-content: center;
             gap: 10px;
-            flex-wrap: wrap;
+            margin-bottom: 20px;
         }
 
-        .task-title {
+        .quick-btn {
+            padding: 10px 15px;
+            background-color: var(--primary-orange);
+            color: white;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+
+        #setWorkMode { background-color: var(--primary-pink); color: white; }
+        #setBreakMode { background-color: var(--primary-green); color: white; }
+
+        .tracking {
+            margin-top: 30px;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+
+        .stat-box {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            min-width: 120px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .stat-box div:first-child {
             font-weight: bold;
-            flex-grow: 0;
-            min-width: 200px;
-            word-wrap: break-word;
-            min-height: 20px;
-            padding: 5px;
-            border: none;
-            border-radius: 4px;
-            width: 65%;
+            margin-bottom: 5px;
+            font-size: 1em;
         }
 
-        .complete-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            white-space: nowrap;
-            margin-left: 10px;
-            flex-shrink: 1;
-            min-width: 0;
-            overflow: hidden;
+        .stat-box div:last-child {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--primary-purple);
         }
 
-        .current-step {
+        .reset-tracking-btn {
+            background-color: var(--primary-orange);
+            color: white;
+            margin: 10px auto;
+            display: block;
+        }
+
+        .projects-container {
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 10px;
             width: 100%;
-            min-height: 120px;
-            max-height: 200px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            resize: none;
-            font-size: 13px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-y: auto;
-            background-color: white;
-            line-height: 1.4;
         }
 
-        .task-meta {
+        .project-input {
             display: flex;
             gap: 10px;
-            margin-top: 8px;
-            font-size: 0.85em;
-            color: #666;
-            flex-wrap: wrap;
-            align-items: center;
+            margin-bottom: 15px;
         }
 
-        .task-meta-item {
+        .project-input input {
+            flex: 1;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .project-item {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+
+        .project-item.selected {
+            background-color: #e1bee7;
+        }
+
+        .project-main-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .project-name {
+            flex: 1;
+            min-width: 100px;
+            font-weight: 500;
+            padding: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .project-stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .project-stat {
             display: flex;
             align-items: center;
             gap: 5px;
-        }
-
-        .notes-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin: 10px 0;
-            cursor: pointer;
-            color: #1a73e8;
             font-size: 0.9em;
         }
 
-        .notes-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
+        .project-time {
+            margin-left: 5px;
+            font-size: 0.8em;
+            color: #666;
         }
 
-        .notes-content.expanded {
-            max-height: 1000px;
-        }
-
-        .task-controls {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .delete-btn {
-            background-color: #dc3545;
-            padding: 6px 12px;
-        }
-
-        .move-buttons {
-            position: absolute;
-            top: 50px;
-            right: 12px;
+        .project-actions {
             display: flex;
             gap: 5px;
         }
 
-        .search-container {
-            display: flex;
-            margin: 15px;
-            align-items: center;
+        .project-action-btn {
+            padding: 3px 8px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
         }
 
-        .search-bar {
-            flex-grow: 1;
-            max-width: 400px;
-            margin-left: 10px;
+        .project-action-btn:hover {
+            background-color: #e0e0e0;
         }
 
-        .notes-container {
+        .project-notes-section {
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .project-notes-toggle {
+            background-color: #f5f5f5;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
+            width: 100%;
+            text-align: left;
+        }
+
+        .project-notes-toggle:hover {
+            background-color: #e0e0e0;
+        }
+
+        .project-notes-toggle::after {
+            content: "▼";
+            float: right;
+            font-size: 0.7em;
+        }
+
+        .project-notes-toggle.expanded::after {
+            content: "▲";
+        }
+
+        .project-notes {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            margin-top: 5px;
+            font-size: 0.9em;
+            min-height: 180px;
+            box-sizing: border-box;
+            display: none;
+        }
+
+        .mode-indicator {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 50px;
+            display: inline-block;
+        }
+
+        .work-mode { background-color: var(--work-bg); color: var(--work-text); }
+        .break-mode { background-color: var(--break-bg); color: var(--break-text); }
+
+        .editable {
+            padding: 2px;
+            min-width: 20px;
+            display: inline-block;
+            border: none;
+            background: transparent;
+        }
+
+        .editable:focus {
+            outline: none;
+            background-color: #f5f9ff;
+        }
+
+        /* Confetti animation */
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Dropdown Menu Styles */
+        .dropdown {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+        
+        .dropdown-btn {
+            padding: 10px 15px;
+            background: #673ab7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .dropdown-items {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: white;
+            min-width: 180px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .dropdown-items.show {
+            display: block;
+        }
+        
+        .item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .item:hover {
+            background: #f5f5f5;
+        }
+        
+        /* Panel Styles */
+        .panel {
+            display: none;
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        
+        .panel.show {
+            display: block;
+        }
+        
+        /* Info Panel Specific */
+        .info-panel {
+            width: 300px;
+        }
+        
+        .info-panel h3 {
+            margin-top: 0;
+            color: #673ab7;
+        }
+        
+        .info-panel h4 {
+            color: #673ab7;
+            margin-bottom: 10px;
+        }
+        
+        .info-panel p {
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .info-panel ol, .info-panel ul {
+            padding-left: 20px;
+        }
+        
+        .info-panel li {
+            margin-bottom: 8px;
+        }
+        
+        /* Productivity Panel Specific */
+        .productivity-panel {
+            width: 350px;
+        }
+        
+        .productivity-panel h3 {
+            margin-top: 0;
+            color: #673ab7;
+        }
+        
+        .productivity-panel h4 {
+            color: #673ab7;
+            margin-bottom: 10px;
+        }
+        
+        .productivity-panel p {
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .productivity-panel ul {
+            padding-left: 20px;
+        }
+        
+        .productivity-panel li {
+            margin-bottom: 8px;
+        }
+        
+        /* Sounds Panel Specific */
+        .sounds-panel {
+            width: 250px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .sound-option {
+            padding: 8px 0;
+            cursor: pointer;
+        }
+        
+        .sound-option:hover {
+            color: #673ab7;
+        }
+        
+        .volume-control {
             width: 100%;
             margin-top: 15px;
         }
         
-        .large-notes {
-            width: 100%;
-            min-height: 150px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            resize: vertical;
-            font-size: 14px;
+        /* Music Panel Specific */
+        .music-panel {
+            width: 280px;
         }
-
-        .star-rating {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .star-rating i {
-            color: #ddd;
-            cursor: pointer;
-            font-size: 18px;
-            transition: color 0.2s;
-        }
-
-        .star-rating i.active {
-            color: #ffc107;
-        }
-
-        .timeline-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .timeline-bar {
-            height: 6px;
-            width: 100px;
-            background-color: #e0e0e0;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 5px;
-        }
-
-        .timeline-progress {
-            height: 100%;
-            border-radius: 3px;
-            transition: width 0.5s ease, background-color 0.5s ease;
-        }
-
-        .timeline-dates {
-            font-size: 11px;
-            color: #666;
-        }
-
-        .subheading {
-            background-color: #e0e0e0;
-            padding: 5px 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            position: relative;
-            cursor: pointer;
-            height: 30px;
-        }
-
-        .subheading-input {
-            border: none;
-            background: transparent;
-            font-weight: bold;
-            flex: 1;
-            padding: 2px 5px;
-            height: 20px;
-        }
-
-        .subheading-input:focus {
-            outline: none;
-            background: white;
-        }
-
-        .subheading-controls {
-            display: flex;
-            gap: 5px;
-            margin-left: 10px;
-        }
-
-        .subheading-selector {
-            position: absolute;
-            right: 50px;
-            top: 12px;
-        }
-
-        .new-item-btn {
-            min-width: 120px;
-            margin-right: 10px;
-            padding: 8px 15px;
-            font-size: 13px;
-            background-color: #28a745;
-        }
-
-        .reset-btn {
-            background-color: #dc3545;
-            margin-top: 15px;
-        }
-
-        .new-subheading-bar {
-            display: flex;
-            gap: 5px;
-            margin: 10px 15px;
-            height: 30px;
-            background-color: #e0e0e0;
-            padding: 5px 10px;
-            border-radius: 4px;
-            align-items: center;
-        }
-
-        .new-subheading-input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 2px 5px;
-            height: 20px;
-        }
-
-        .new-subheading-input:focus {
-            outline: none;
-            background: white;
-        }
-
-        .collapsible-content {
-            max-height: 1000px;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .collapsible-content.collapsed {
-            max-height: 0;
-        }
-
-        .settings-menu {
-            display: none;
-            position: absolute;
-            right: 10px;
-            top: 50px;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-
-        .settings-menu.active {
+        
+        .lofi-channel {
             display: block;
+            padding: 10px;
+            margin: 8px 0;
+            background: #f8f8f8;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #333;
+            transition: background 0.2s;
         }
-
-        .color-picker {
-            display: flex;
-            gap: 5px;
-            margin-top: 5px;
+        
+        .lofi-channel:hover {
+            background: #e9e9e9;
         }
-
-        .color-option {
-            width: 20px;
-            height: 20px;
+        
+        .lofi-channel img {
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        /* Rewards Panel Specific */
+        .rewards-panel {
+            width: 280px;
+            text-align: center;
+        }
+        
+        /* Donate Panel Specific */
+        .donate-panel {
+            width: 280px;
+            text-align: center;
+        }
+        
+        .donate-option {
+            display: block;
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #333;
+            transition: background 0.2s;
+        }
+        
+        .donate-option:hover {
+            background: #e9e9e9;
+        }
+        
+        /* Close Button */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 18px;
             cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .color-option.selected {
-            border-color: #000;
-        }
-
-        /* Subheading controls spacing */
-        .subheading-controls {
-            gap: 8px !important;
-            margin-left: 15px !important;
-        }
-
-        /* Add button sizing */
-        .new-subheading-bar button {
-            height: 30px !important;
-            padding: 0 10px !important;
-            line-height: 30px !important;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-                height: auto;
-            }
-            
-            .sidebar {
-                width: 100%;
-                height: auto;
-                flex-direction: row;
-                padding: 10px;
-                align-items: center;
-            }
-            
-            .sidebar:hover {
-                width: 100%;
-                height: auto;
-            }
-            
-            .logo-container {
-                margin-bottom: 0;
-                margin-right: 20px;
-            }
-            
-            .nav-menu {
-                flex-direction: row;
-                overflow-x: auto;
-            }
-            
-            .menu-item {
-                margin-bottom: 0;
-                margin-right: 5px;
-                padding: 10px;
-            }
-            
-            .menu-text {
-                display: none !important;
-            }
-            
-            .divider {
-                display: none;
-            }
-            
-            .main-content {
-                height: auto;
-            }
-
-            /* Task management mobile styles */
-            .input-section {
-                flex-direction: column;
-            }
-            
-            .wide-input-section .input-group:first-child,
-            .wide-input-section .input-group:not(:first-child) {
-                flex: 1 0 100%;
-                min-width: 100%;
-            }
-            
-            .wide-input-section button {
-                margin-left: 0;
-                width: 100%;
-            }
-            
-            .task-meta {
-                flex-direction: column;
-                gap: 5px;
-            }
-            
-            button {
-                padding: 6px 12px;
-            }
-
-            .subheading-selector {
-                position: static;
-                margin-top: 5px;
-                width: 100%;
-            }
-            
-            .task-title {
-                width: 100% !important;
-            }
-            
-            .complete-checkbox {
-                margin-left: 0;
-                margin-top: 10px;
-                width: 100%;
-            }
-            
-            .current-step {
-                width: 100% !important;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="logo-container">
-            <div class="logo">S</div>
-            <div class="logo-text">System Manager</div>
+    <!-- Dropdown Menu -->
+    <div class="dropdown">
+        <button class="dropdown-btn" id="menuBtn">☰ Menu</button>
+        <div class="dropdown-items" id="menuItems">
+            <div class="item" data-panel="info">ℹ️ Pomodoro Info</div>
+            <div class="item" data-panel="productivity">📊 Productivity Tracking</div>
+            <div class="item" data-panel="sounds">🎵 Background Sounds</div>
+            <div class="item" data-panel="music">🎧 LoFi Channels</div>
+            <div class="item" data-panel="rewards">🏆 Rewards</div>
+            <div class="item" data-panel="donate">☕ Support</div>
+        </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="panel info-panel" id="infoPanel">
+        <button class="close-btn" id="closeInfo">×</button>
+        <h3>About Pomodoro Technique</h3>
+        <p>The Pomodoro Technique is a time management method developed by Francesco Cirillo in the late 1980s.</p>
+        
+        <h4>How to Use This Timer:</h4>
+        <ol>
+            <li><strong>Choose a task</strong> to focus on</li>
+            <li><strong>Start the 25-minute timer</strong> (work session)</li>
+            <li>Work focused until the timer rings</li>
+            <li>Take a <strong>5-minute break</strong></li>
+            <li>After 4 work sessions, take a <strong>30-minute break</strong></li>
+            <li><strong>Change tasks</strong> after each Pomodoro to maintain productivity</li>
+        </ol>
+        
+        <h4>Key Productivity Tips:</h4>
+        <ul>
+            <li>Switch tasks every 25 minutes to maintain fresh focus</li>
+            <li>Use work notes to track different tasks</li>
+            <li>During breaks, completely disengage from work</li>
+            <li>Adjust timer lengths based on task complexity</li>
+            <li>Use the 5-minute breaks to stretch and refresh</li>
+        </ul>
+    </div>
+
+    <!-- Productivity Panel -->
+    <div class="panel productivity-panel" id="productivityPanel">
+        <button class="close-btn" id="closeProductivity">×</button>
+        <h3>Why Track Productivity?</h3>
+        <p>Tracking your work time and accomplishments provides concrete data to demonstrate your value to your organization.</p>
+        
+        <h4>Benefits for Performance Reviews:</h4>
+        <ul>
+            <li><strong>Quantify your contributions</strong> with exact hours worked and tasks completed</li>
+            <li><strong>Show efficiency improvements</strong> over time with historical data</li>
+            <li><strong>Document your focus</strong> - time tracking shows dedication to important tasks</li>
+            <li><strong>Identify productivity patterns</strong> to optimize your work habits</li>
+        </ul>
+        
+        <h4>How to Present for Raises:</h4>
+        <ul>
+            <li><strong>Show consistent productivity</strong> with your tracked work hours</li>
+            <li><strong>Highlight completed projects</strong> from your notes with time invested</li>
+            <li><strong>Demonstrate work-life balance</strong> with proper break tracking</li>
+            <li><strong>Show initiative</strong> by presenting your self-tracking system</li>
+            <li><strong>Connect to business outcomes</strong> - link your time to measurable results</li>
+        </ul>
+    </div>
+
+    <!-- Sounds Panel -->
+    <div class="panel sounds-panel" id="soundsPanel">
+        <button class="close-btn" id="closeSounds">×</button>
+        <h3>Background Sounds</h3>
+        
+        <div class="sound-option" data-sound="rain">🌧️ Rain</div>
+        <div class="sound-option" data-sound="forest">🌲 Forest</div>
+        <div class="sound-option" data-sound="waves">🌊 Ocean Waves</div>
+        <div class="sound-option" data-sound="coffee">☕ Coffee Shop</div>
+        <div class="sound-option" data-sound="whitenoise">⚪ White Noise</div>
+        <div class="sound-option" data-sound="pinknoise">🌸 Pink Noise</div>
+        <div class="sound-option" data-sound="brownnoise">🟤 Brown Noise</div>
+        <div class="sound-option" data-sound="fan">🌀 Fan Noise</div>
+        <div class="sound-option" data-sound="thunder">⚡ Thunderstorm</div>
+        <div class="sound-option" data-sound="river">🌊 River Stream</div>
+        <div class="sound-option" data-sound="birds">🐦 Birds Chirping</div>
+        <div class="sound-option" data-sound="fireplace">🔥 Fireplace</div>
+        <div class="sound-option" data-sound="city">🏙️ City Ambience</div>
+        <div class="sound-option" data-sound="wind">🌬️ Wind</div>
+        <div class="sound-option" data-sound="crickets">🦗 Crickets</div>
+        <div class="sound-option" data-sound="waterfall">🌊 Waterfall</div>
+        <div class="sound-option" data-sound="library">📚 Library</div>
+        <div class="sound-option" data-sound="rainroof">☔ Rain on Roof</div>
+        
+        <input type="range" min="0" max="1" step="0.1" value="0.5" class="volume-control" id="volumeControl">
+        <div style="text-align: center;">Volume</div>
+    </div>
+
+    <!-- Music Panel -->
+    <div class="panel music-panel" id="musicPanel">
+        <button class="close-btn" id="closeMusic">×</button>
+        <h3>Popular LoFi Channels</h3>
+        
+        <a href="https://www.youtube.com/watch?v=jfKfPfyJRdk" target="_blank" class="lofi-channel">
+            <img src="https://i.ytimg.com/vi/jfKfPfyJRdk/hqdefault.jpg" alt="LoFi Girl">
+            LoFi Girl
+        </a>
+        
+        <a href="https://www.youtube.com/watch?v=rUxyKA_-grg" target="_blank" class="lofi-channel">
+            <img src="https://i.ytimg.com/vi/rUxyKA_-grg/hqdefault.jpg" alt="Chillhop">
+            Chillhop Music
+        </a>
+        
+        <a href="https://www.youtube.com/watch?v=7NOSDKb0HlU" target="_blank" class="lofi-channel">
+            <img src="https://i.ytimg.com/vi/7NOSDKb0HlU/hqdefault.jpg" alt="Chill Cow">
+            Chill Cow
+        </a>
+        
+        <a href="https://www.youtube.com/watch?v=4xDzrJKXOOY" target="_blank" class="lofi-channel">
+            <img src="https://i.ytimg.com/vi/4xDzrJKXOOY/hqdefault.jpg" alt="Ambient Worlds">
+            Ambient Worlds
+        </a>
+    </div>
+
+    <!-- Rewards Panel -->
+    <div class="panel rewards-panel" id="rewardsPanel">
+        <button class="close-btn" id="closeRewards">×</button>
+        <h3>Rewards</h3>
+        <p>Coming soon!</p>
+    </div>
+
+    <!-- Donate Panel -->
+    <div class="panel donate-panel" id="donatePanel">
+        <button class="close-btn" id="closeDonate">×</button>
+        <h3>Support This Project</h3>
+        <p>Enjoying this Pomodoro timer? Buy me a coffee!</p>
+        
+        <a href="https://www.paypal.com/donate?business=YOUR_EMAIL&item_name=Pomodoro+Timer+Support" 
+           target="_blank" 
+           class="donate-option">
+           💳 PayPal
+        </a>
+        
+        <a href="https://ko-fi.com/YOUR_USERNAME" 
+           target="_blank" 
+           class="donate-option">
+           ☕ Ko-fi
+        </a>
+        
+        <a href="https://www.buymeacoffee.com/YOUR_USERNAME" 
+           target="_blank" 
+           class="donate-option">
+           🍵 Buy Me a Coffee
+        </a>
+    </div>
+
+    <!-- Audio Elements (hidden) -->
+    <audio id="rainSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-rain-ambience-1193.mp3"></audio>
+    <audio id="forestSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-forest-ambience-1683.mp3"></audio>
+    <audio id="wavesSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-waves-coming-to-shore-1934.mp3"></audio>
+    <audio id="coffeeSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-busy-coffee-shop-1655.mp3"></audio>
+    <audio id="whitenoiseSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-white-noise-ambience-1719.mp3"></audio>
+    <audio id="pinknoiseSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-pink-noise-ambience-1720.mp3"></audio>
+    <audio id="brownnoiseSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-brown-noise-ambience-1721.mp3"></audio>
+    <audio id="fanSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-fan-ambience-1684.mp3"></audio>
+    <audio id="thunderSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-thunder-ambience-1682.mp3"></audio>
+    <audio id="riverSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-river-ambience-1718.mp3"></audio>
+    <audio id="birdsSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-birds-chirping-ambience-1722.mp3"></audio>
+    <audio id="fireplaceSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-fireplace-ambience-1681.mp3"></audio>
+    <audio id="citySound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-city-traffic-ambience-1723.mp3"></audio>
+    <audio id="windSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-wind-ambience-1717.mp3"></audio>
+    <audio id="cricketsSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-crickets-ambience-1686.mp3"></audio>
+    <audio id="waterfallSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-waterfall-ambience-1687.mp3"></audio>
+    <audio id="librarySound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-library-ambience-1680.mp3"></audio>
+    <audio id="rainroofSound" loop src="https://assets.mixkit.co/sfx/preview/mixkit-rain-on-window-1194.mp3"></audio>
+
+    <div class="animal-side animal-left">
+        <img class="animal-gif" id="leftAnimalGif" src="assets/working-dog-animation.gif" alt="Working animal">
+    </div>
+
+    <div class="container">
+        <h1>Pomodoro Timer</h1>
+        
+        <div class="header-buttons">
+            <button class="mode-btn" id="setWorkMode">Set Work Mode</button>
+            <button class="mode-btn" id="setBreakMode">Set Break Mode</button>
         </div>
         
-        <div class="nav-menu">
-            <div class="menu-item active" onclick="setActive(this); showTab('dashboard')">
-                <div class="menu-icon"><i class="fas fa-home"></i></div>
-                <div class="menu-text">Dashboard</div>
-                <div class="menu-chevron"><i class="fas fa-chevron-down"></i></div>
+        <div class="mode-indicator" id="modeIndicator">Work Time</div>
+        
+        <div class="timer-container">
+            <div class="timer-progress" id="timerProgress"></div>
+            <div class="timer-circle"></div>
+            <div class="timer-display" id="timer" contenteditable="true">25:00</div>
+        </div>
+        
+        <div class="buttons">
+            <button id="start">Start</button>
+            <button id="pause">Pause</button>
+            <button id="stop">Stop</button>
+            <button id="reset">Reset</button>
+        </div>
+        
+        <div class="quick-buttons">
+            <button class="quick-btn" id="work25">Work (25:00)</button>
+            <button class="quick-btn" id="break5">Break (5:00)</button>
+            <button class="quick-btn" id="break30">Long Break (30:00)</button>
+        </div>
+        
+        <div class="tracking">
+            <h2>Tracking</h2>
+            
+            <div class="stats">
+                <div class="stat-box">
+                    <div>Work Time:</div>
+                    <div id="totalWork">00:00:00</div>
+                </div>
+                <div class="stat-box">
+                    <div>Break Time:</div>
+                    <div id="totalBreak">00:00:00</div>
+                </div>
             </div>
             
-            <div class="menu-item" onclick="setActive(this); showTab('tasks')">
-                <div class="menu-icon"><i class="fas fa-tasks"></i></div>
-                <div class="menu-text">Tasks</div>
-                <div class="menu-chevron"><i class="fas fa-chevron-down"></i></div>
-            </div>
+            <button id="resetTracking" class="reset-tracking-btn">Reset Tracking Time</button>
             
-            <div class="menu-item" onclick="setActive(this); showTab('notes')">
-                <div class="menu-icon"><i class="fas fa-sticky-note"></i></div>
-                <div class="menu-text">Notes</div>
-                <div class="menu-chevron"><i class="fas fa-chevron-down"></i></div>
-            </div>
-            
-            <div class="menu-item" onclick="setActive(this); showTab('contacts')">
-                <div class="menu-icon"><i class="fas fa-address-book"></i></div>
-                <div class="menu-text">Contacts</div>
-                <div class="menu-chevron"><i class="fas fa-chevron-down"></i></div>
-            </div>
-            
-            <div class="menu-item" onclick="setActive(this); showTab('process')">
-                <div class="menu-icon"><i class="fas fa-project-diagram"></i></div>
-                <div class="menu-text">Process</div>
-                <div class="menu-chevron"><i class="fas fa-chevron-down"></i></div>
-            </div>
-            
-            <div class="menu-item" onclick="setActive(this); showTab('calendar')">
-                <div class="menu-icon"><i class="fas fa-calendar-alt"></i></div>
-                <div class="menu-text">Calendar</div>
-                <div class="menu-chevron"><i class="fas fa-chevron-down"></i></div>
-            </div>
-            
-            <div class="divider"></div>
-            
-            <div class="menu-item" onclick="setActive(this); showTab('settings')">
-                <div class="menu-icon"><i class="fas fa-cog"></i></div>
-                <div class="menu-text">Settings</div>
-                <div class="menu-chevron"><i class="fas fa-chevron-down"></i></div>
+            <div class="projects-container">
+                <h3>Project Tracking</h3>
+                <div class="project-input">
+                    <input type="text" id="projectInput" placeholder="Enter project name">
+                    <button id="addProjectBtn">Add Project</button>
+                </div>
+                <div class="project-list" id="projectList"></div>
             </div>
         </div>
     </div>
 
-    <div class="main-content">
-        <div class="content-header">
-            <div class="content-title" id="contentTitle">Dashboard</div>
-        </div>
-
-        <!-- Dashboard Tab -->
-        <div id="dashboard" class="tab-content active">
-            <h2>Dashboard Content</h2>
-            <p>This would contain your dashboard information and metrics.</p>
-        </div>
-
-        <!-- Tasks Tab -->
-        <div id="tasks" class="tab-content">
-            <div style="display: flex; align-items: center; margin: 15px;">
-                <button class="new-item-btn" onclick="toggleInputs('tasks')">
-                    <i class="fas fa-plus"></i> New Task
-                </button>
-                <div class="search-container">
-                    <input type="text" class="search-bar" id="taskSearch" placeholder="Search tasks..." oninput="searchTasks()">
-                </div>
-                <button class="settings-button" onclick="toggleSettingsMenu()" style="margin-left: auto;">
-                    <i class="fas fa-cog"></i>
-                </button>
-                <div class="settings-menu" id="settingsMenu">
-                    <button class="reset-btn" onclick="resetAllData()">
-                        Reset All Data
-                    </button>
-                </div>
-            </div>
-            
-            <div class="input-section collapsed wide-input-section">
-                <div class="input-group">
-                    <input type="text" id="taskTitle" placeholder="Task title">
-                </div>
-                <div class="input-group">
-                    <label for="taskStart">Start Date</label>
-                    <input type="date" id="taskStart">
-                </div>
-                <div class="input-group">
-                    <label for="taskDue">Due Date</label>
-                    <input type="date" id="taskDue">
-                </div>
-                <div class="input-group">
-                    <label>Priority</label>
-                    <div class="star-rating" id="priorityStars">
-                        <i class="fas fa-star" data-value="1"></i>
-                        <i class="fas fa-star" data-value="2"></i>
-                        <i class="fas fa-star" data-value="3"></i>
-                        <i class="fas fa-star" data-value="4"></i>
-                        <i class="fas fa-star" data-value="5"></i>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>Color</label>
-                    <div class="color-picker" id="taskColorPicker">
-                        <div class="color-option selected" style="background-color: #1a73e8;" data-color="#1a73e8"></div>
-                        <div class="color-option" style="background-color: #dc3545;" data-color="#dc3545"></div>
-                        <div class="color-option" style="background-color: #28a745;" data-color="#28a745"></div>
-                        <div class="color-option" style="background-color: #ffc107;" data-color="#ffc107"></div>
-                        <div class="color-option" style="background-color: #6f42c1;" data-color="#6f42c1"></div>
-                    </div>
-                </div>
-                <button onclick="addTask()">Add Task</button>
-                
-                <div class="notes-container">
-                    <textarea id="taskNotes" class="large-notes" placeholder="Notes..."></textarea>
-                </div>
-            </div>
-
-            <div class="new-subheading-bar">
-                <input type="text" id="newTaskSubheading" class="new-subheading-input" placeholder="New subheading name">
-                <button onclick="addSubheading('task')">Add</button>
-            </div>
-
-            <div class="task-list" id="tasksList">
-                <h3 class="current-header">Current Tasks</h3>
-                <div id="currentList"></div>
-                <h3 class="completed-header">Completed Tasks</h3>
-                <div id="doneList"></div>
-            </div>
-        </div>
-
-        <!-- Notes Tab -->
-        <div id="notes" class="tab-content">
-            <h2>Notes</h2>
-            <p>This would contain your note-taking functionality.</p>
-        </div>
-
-        <!-- Contacts Tab -->
-        <div id="contacts" class="tab-content">
-            <h2>Contacts</h2>
-            <p>This would contain your contact management system.</p>
-        </div>
-
-        <!-- Process Tab -->
-        <div id="process" class="tab-content">
-            <h2>Process</h2>
-            <p>This would contain your workflow and process management tools.</p>
-        </div>
-
-        <!-- Calendar Tab -->
-        <div id="calendar" class="tab-content">
-            <h2>Calendar Content</h2>
-            <p>This would contain your calendar view and scheduling tools.</p>
-        </div>
-
-        <!-- Settings Tab -->
-        <div id="settings" class="tab-content">
-            <h2>Settings</h2>
-            <p>This would contain your application settings and configuration options.</p>
-        </div>
+    <div class="animal-side animal-right">
+        <img class="animal-gif" id="rightAnimalGif" src="assets/working-dog-animation.gif" alt="Working animal">
     </div>
+
+    <audio id="alarmSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" preload="auto"></audio>
+    <audio id="applauseSound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3" preload="auto"></audio>
 
     <script>
-        // Sidebar functionality
-        function setActive(clickedItem) {
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            clickedItem.classList.add('active');
-        }
+        // ========== DOM Elements ==========
+        const DOM = {
+            timer: document.getElementById('timer'),
+            timerProgress: document.getElementById('timerProgress'),
+            startButton: document.getElementById('start'),
+            pauseButton: document.getElementById('pause'),
+            stopButton: document.getElementById('stop'),
+            resetButton: document.getElementById('reset'),
+            work25Button: document.getElementById('work25'),
+            break5Button: document.getElementById('break5'),
+            break30Button: document.getElementById('break30'),
+            setWorkModeButton: document.getElementById('setWorkMode'),
+            setBreakModeButton: document.getElementById('setBreakMode'),
+            totalWorkDisplay: document.getElementById('totalWork'),
+            totalBreakDisplay: document.getElementById('totalBreak'),
+            resetTracking: document.getElementById('resetTracking'),
+            modeIndicator: document.getElementById('modeIndicator'),
+            projectInput: document.getElementById('projectInput'),
+            addProjectBtn: document.getElementById('addProjectBtn'),
+            projectList: document.getElementById('projectList'),
+            leftAnimalGif: document.getElementById('leftAnimalGif'),
+            rightAnimalGif: document.getElementById('rightAnimalGif'),
+            body: document.body,
+            alarmSound: document.getElementById('alarmSound'),
+            applauseSound: document.getElementById('applauseSound')
+        };
 
-        function showTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.getElementById(tabName).classList.add('active');
-            
-            const titleMap = {
-                'dashboard': 'Dashboard',
-                'tasks': 'Tasks',
-                'notes': 'Notes',
-                'contacts': 'Contacts',
-                'process': 'Process',
-                'calendar': 'Calendar',
-                'settings': 'Settings'
-            };
-            document.getElementById('contentTitle').textContent = titleMap[tabName];
-        }
+        // ========== State Management ==========
+        const STATE = {
+            timer: null,
+            isRunning: false,
+            isPaused: false,
+            isWorkMode: true,
+            totalSeconds: 25 * 60,
+            initialSeconds: 25 * 60,
+            totalWorkSeconds: 0,
+            totalBreakSeconds: 0,
+            sessionStartTime: null,
+            lastTrackingUpdate: 0,
+            completedSessions: 0,
+            breakGif: 'assets/break-animation.gif',
+            projects: [],
+            currentProject: null
+        };
 
-        // Task Management Scripts
-        // Data Management
-        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        let selectedPriority = 1;
-        let selectedColor = '#1a73e8';
-        let taskSubheadings = JSON.parse(localStorage.getItem('taskSubheadings')) || ['General'];
-        let collapsedSubheadings = JSON.parse(localStorage.getItem('collapsedSubheadings')) || {};
-
-        // Auto-resize textarea function
-        function autoResizeTextarea(textarea) {
-            textarea.style.height = 'auto'; // Reset height
-            textarea.style.height = (textarea.scrollHeight) + 'px';
-        }
-
-        // Toggle settings menu
-        function toggleSettingsMenu() {
-            const menu = document.getElementById('settingsMenu');
-            menu.classList.toggle('active');
-        }
-
-        // Toggle input sections
-        function toggleInputs(tab) {
-            const inputSection = document.querySelector(`#${tab} .input-section`);
-            const toggleBtn = document.querySelector(`#${tab} .new-item-btn`);
-            
-            inputSection.classList.toggle('collapsed');
-            
-            if (inputSection.classList.contains('collapsed')) {
-                toggleBtn.innerHTML = '<i class="fas fa-plus"></i> New Task';
-            } else {
-                toggleBtn.innerHTML = 'Hide Form';
-            }
-        }
-
-        // Reset all data
-        function resetAllData() {
-            if (confirm('Are you sure you want to delete ALL data? This cannot be undone.')) {
-                localStorage.clear();
-                tasks = [];
-                taskSubheadings = ['General'];
-                collapsedSubheadings = {};
+        // ========== Timer Functions ==========
+        const timerActions = {
+            start() {
+                if (STATE.isRunning) return;
                 
-                saveAllData();
-                renderTasks();
-            }
-        }
-
-        function saveAllData() {
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            localStorage.setItem('taskSubheadings', JSON.stringify(taskSubheadings));
-            localStorage.setItem('collapsedSubheadings', JSON.stringify(collapsedSubheadings));
-        }
-
-        // Subheading functions
-        function renderSubheadings(type) {
-            const listContainer = document.getElementById('tasksList');
-            
-            // Clear the containers
-            listContainer.innerHTML = '<h3 class="current-header">Current Tasks</h3><div id="currentList"></div><h3 class="completed-header">Completed Tasks</h3><div id="doneList"></div>';
-            
-            taskSubheadings.forEach((subheading, index) => {
-                // Render items for this subheading in the list container
-                renderItemsForSubheading(type, subheading, listContainer, index);
-            });
-        }
-
-        function renderItemsForSubheading(type, subheading, container, index) {
-            let items = tasks.filter(t => t.subheading === subheading);
-            
-            if (items.length === 0) return;
-            
-            // Check if this subheading is collapsed
-            const isCollapsed = collapsedSubheadings[`${type}-${subheading}`] || false;
-            
-            // Add subheading label
-            const subheadingElement = document.createElement('div');
-            subheadingElement.className = 'subheading';
-            subheadingElement.onclick = (e) => {
-                // Don't toggle if clicking on controls
-                if (e.target.closest('.subheading-controls')) return;
+                if (STATE.totalSeconds <= 0) {
+                    STATE.totalSeconds = STATE.initialSeconds;
+                    timerActions.updateDisplay();
+                }
                 
-                const key = `${type}-${subheading}`;
-                collapsedSubheadings[key] = !collapsedSubheadings[key];
-                localStorage.setItem('collapsedSubheadings', JSON.stringify(collapsedSubheadings));
+                STATE.isRunning = true;
+                STATE.isPaused = false;
+                STATE.sessionStartTime = new Date();
+                STATE.lastTrackingUpdate = Date.now();
                 
-                const content = subheadingElement.nextElementSibling;
-                content.classList.toggle('collapsed');
-            };
-            
-            const input = document.createElement('input');
-            input.className = 'subheading-input';
-            input.value = subheading;
-            input.placeholder = 'Subheading name';
-            input.onchange = () => updateSubheading(type, index, input.value);
-            
-            const controls = document.createElement('div');
-            controls.className = 'subheading-controls';
-            
-            const upBtn = document.createElement('button');
-            upBtn.innerHTML = '↑';
-            upBtn.style.padding = '2px 5px';
-            upBtn.onclick = (e) => {
-                e.stopPropagation();
-                moveSubheading(type, index, 'up');
-            };
-            upBtn.disabled = index === 0;
-            
-            const downBtn = document.createElement('button');
-            downBtn.innerHTML = '↓';
-            downBtn.style.padding = '2px 5px';
-            downBtn.onclick = (e) => {
-                e.stopPropagation();
-                moveSubheading(type, index, 'down');
-            };
-            downBtn.disabled = index === taskSubheadings.length - 1;
-            
-            const removeBtn = document.createElement('button');
-            removeBtn.innerHTML = '×';
-            removeBtn.style.padding = '2px 5px';
-            removeBtn.style.backgroundColor = '#dc3545';
-            removeBtn.onclick = (e) => {
-                e.stopPropagation();
-                removeSubheading(type, index);
-            };
-            removeBtn.disabled = taskSubheadings.length <= 1;
-            
-            controls.appendChild(upBtn);
-            controls.appendChild(downBtn);
-            controls.appendChild(removeBtn);
-            
-            subheadingElement.appendChild(input);
-            subheadingElement.appendChild(controls);
-            
-            // Create content container
-            const contentContainer = document.createElement('div');
-            contentContainer.className = `collapsible-content ${isCollapsed ? 'collapsed' : ''}`;
-            
-            // For tasks, we need to add to either current or completed list
-            const currentItems = items.filter(t => !t.completed);
-            const completedItems = items.filter(t => t.completed);
-            
-            if (currentItems.length > 0) {
-                const currentContainer = document.getElementById('currentList');
-                currentContainer.appendChild(subheadingElement.cloneNode(true));
-                const currentContent = document.createElement('div');
-                currentContent.className = `collapsible-content ${isCollapsed ? 'collapsed' : ''}`;
+                DOM.startButton.style.display = 'none';
+                DOM.pauseButton.style.display = 'inline-block';
+                DOM.stopButton.style.display = 'inline-block';
                 
-                currentItems.forEach(task => {
-                    const taskElement = createTaskElement(task);
-                    currentContent.appendChild(taskElement);
-                });
+                DOM.body.classList.remove('work-mode', 'break-mode');
+                DOM.body.classList.add(STATE.isWorkMode ? 'work-mode' : 'break-mode');
                 
-                currentContainer.appendChild(currentContent);
-            }
-            
-            if (completedItems.length > 0) {
-                const completedHeader = document.createElement('div');
-                completedHeader.className = 'subheading';
-                completedHeader.textContent = `${subheading} - Completed`;
-                completedHeader.onclick = (e) => {
-                    if (e.target.closest('.subheading-controls')) return;
-                    const key = `${type}-${subheading}-completed`;
-                    collapsedSubheadings[key] = !collapsedSubheadings[key];
-                    localStorage.setItem('collapsedSubheadings', JSON.stringify(collapsedSubheadings));
+                if (STATE.isWorkMode) {
+                    DOM.leftAnimalGif.src = 'assets/working-dog-animation.gif';
+                    DOM.rightAnimalGif.src = 'assets/working-dog-animation.gif';
+                } else {
+                    DOM.leftAnimalGif.src = STATE.breakGif;
+                    DOM.rightAnimalGif.src = STATE.breakGif;
+                }
+                
+                STATE.timer = setInterval(() => {
+                    STATE.totalSeconds--;
+                    timerActions.updateDisplay();
                     
-                    const content = completedHeader.nextElementSibling;
-                    content.classList.toggle('collapsed');
+                    const progressPercent = 100 - (STATE.totalSeconds / STATE.initialSeconds * 100);
+                    DOM.timerProgress.style.background = `conic-gradient(var(--primary-blue) ${progressPercent}%, transparent ${progressPercent}%)`;
+                    
+                    const now = Date.now();
+                    const elapsedSeconds = Math.floor((now - STATE.lastTrackingUpdate) / 1000);
+                    
+                    if (elapsedSeconds >= 1) {
+                        if (STATE.isWorkMode) {
+                            STATE.totalWorkSeconds += elapsedSeconds;
+                            if (STATE.currentProject) {
+                                const project = STATE.projects.find(p => p.id === STATE.currentProject);
+                                if (project) {
+                                    project.workTime += elapsedSeconds;
+                                    projectActions.saveProjects();
+                                    projectActions.renderProjects();
+                                }
+                            }
+                        } else {
+                            STATE.totalBreakSeconds += elapsedSeconds;
+                            if (STATE.currentProject) {
+                                const project = STATE.projects.find(p => p.id === STATE.currentProject);
+                                if (project) {
+                                    project.breakTime += elapsedSeconds;
+                                    projectActions.saveProjects();
+                                    projectActions.renderProjects();
+                                }
+                            }
+                        }
+                        STATE.lastTrackingUpdate = now;
+                        trackingActions.updateDisplay();
+                    }
+                    
+                    if (STATE.totalSeconds === 0) {
+                        DOM.alarmSound.play();
+                        celebrationActions.triggerCelebration();
+                    }
+                    
+                    if (STATE.totalSeconds <= 0) {
+                        if (Math.abs(STATE.totalSeconds) % 60 === 0) {
+                            const now = Date.now();
+                            const elapsedSeconds = Math.floor((now - STATE.lastTrackingUpdate) / 1000);
+                            
+                            if (elapsedSeconds >= 1) {
+                                if (STATE.isWorkMode) {
+                                    STATE.totalWorkSeconds += elapsedSeconds;
+                                } else {
+                                    STATE.totalBreakSeconds += elapsedSeconds;
+                                }
+                                STATE.lastTrackingUpdate = now;
+                                trackingActions.updateDisplay();
+                            }
+                        }
+                    }
+                    
+                    if (STATE.totalSeconds === -1) {
+                        const sessionEndTime = new Date();
+                        const sessionDuration = Math.floor((sessionEndTime - STATE.sessionStartTime) / 1000);
+                        
+                        if (STATE.isWorkMode) {
+                            STATE.totalWorkSeconds += sessionDuration;
+                            STATE.completedSessions++;
+                            if (STATE.currentProject) {
+                                const project = STATE.projects.find(p => p.id === STATE.currentProject);
+                                if (project) {
+                                    project.pomodoros++;
+                                    project.workTime += sessionDuration;
+                                    projectActions.saveProjects();
+                                    projectActions.renderProjects();
+                                }
+                            }
+                        } else {
+                            STATE.totalBreakSeconds += sessionDuration;
+                            if (STATE.currentProject) {
+                                const project = STATE.projects.find(p => p.id === STATE.currentProject);
+                                if (project) {
+                                    project.breaks++;
+                                    project.breakTime += sessionDuration;
+                                    projectActions.saveProjects();
+                                    projectActions.renderProjects();
+                                }
+                            }
+                        }
+                        
+                        trackingActions.updateDisplay();
+                        
+                        STATE.isWorkMode = !STATE.isWorkMode;
+                        timerActions.updateModeIndicator();
+                        
+                        DOM.body.classList.remove('work-mode', 'break-mode');
+                        DOM.body.classList.add(STATE.isWorkMode ? 'work-mode' : 'break-mode');
+                        
+                        if (STATE.isWorkMode) {
+                            DOM.leftAnimalGif.src = 'assets/working-dog-animation.gif';
+                            DOM.rightAnimalGif.src = 'assets/working-dog-animation.gif';
+                        } else {
+                            DOM.leftAnimalGif.src = STATE.breakGif;
+                            DOM.rightAnimalGif.src = STATE.breakGif;
+                        }
+                        
+                        if (STATE.isWorkMode) {
+                            timerActions.setQuickTime(25, 0, true);
+                        } else {
+                            const lastBreakWasShort = localStorage.getItem('lastBreakWasShort') === 'true';
+                            if (lastBreakWasShort) {
+                                timerActions.setQuickTime(30, 0, false);
+                                localStorage.setItem('lastBreakWasShort', 'false');
+                            } else {
+                                timerActions.setQuickTime(5, 0, false);
+                                localStorage.setItem('lastBreakWasShort', 'true');
+                            }
+                        }
+                        
+                        DOM.startButton.style.display = 'inline-block';
+                        DOM.pauseButton.style.display = 'none';
+                        DOM.stopButton.style.display = 'none';
+                        STATE.sessionStartTime = null;
+                    }
+                }, 1000);
+            },
+
+            pause() {
+                if (STATE.isRunning) {
+                    clearInterval(STATE.timer);
+                    STATE.isRunning = false;
+                    STATE.isPaused = true;
+                    DOM.startButton.style.display = 'inline-block';
+                    DOM.pauseButton.style.display = 'none';
+                    DOM.stopButton.style.display = 'inline-block';
+                    
+                    const now = new Date();
+                    const sessionDuration = Math.floor((now - STATE.sessionStartTime) / 1000);
+                    
+                    if (STATE.isWorkMode) {
+                        STATE.totalWorkSeconds += sessionDuration;
+                        if (STATE.currentProject) {
+                            const project = STATE.projects.find(p => p.id === STATE.currentProject);
+                            if (project) {
+                                project.workTime += sessionDuration;
+                                projectActions.saveProjects();
+                                projectActions.renderProjects();
+                            }
+                        }
+                    } else {
+                        STATE.totalBreakSeconds += sessionDuration;
+                        if (STATE.currentProject) {
+                            const project = STATE.projects.find(p => p.id === STATE.currentProject);
+                            if (project) {
+                                project.breakTime += sessionDuration;
+                                projectActions.saveProjects();
+                                projectActions.renderProjects();
+                            }
+                        }
+                    }
+                    
+                    trackingActions.updateDisplay();
+                    STATE.sessionStartTime = null;
+                }
+            },
+
+            stop() {
+                if (STATE.isRunning || STATE.isPaused) {
+                    clearInterval(STATE.timer);
+                    STATE.isRunning = false;
+                    STATE.isPaused = false;
+                    DOM.startButton.style.display = 'inline-block';
+                    DOM.pauseButton.style.display = 'none';
+                    DOM.stopButton.style.display = 'none';
+                    
+                    if (STATE.sessionStartTime) {
+                        const sessionEndTime = new Date();
+                        const sessionDuration = Math.floor((sessionEndTime - STATE.sessionStartTime) / 1000);
+                        
+                        if (STATE.isWorkMode) {
+                            STATE.totalWorkSeconds += sessionDuration;
+                            STATE.completedSessions++;
+                            if (STATE.currentProject) {
+                                const project = STATE.projects.find(p => p.id === STATE.currentProject);
+                                if (project) {
+                                    project.pomodoros++;
+                                    project.workTime += sessionDuration;
+                                    projectActions.saveProjects();
+                                    projectActions.renderProjects();
+                                }
+                            }
+                        } else {
+                            STATE.totalBreakSeconds += sessionDuration;
+                            if (STATE.currentProject) {
+                                const project = STATE.projects.find(p => p.id === STATE.currentProject);
+                                if (project) {
+                                    project.breaks++;
+                                    project.breakTime += sessionDuration;
+                                    projectActions.saveProjects();
+                                    projectActions.renderProjects();
+                                }
+                            }
+                        }
+                        
+                        trackingActions.updateDisplay();
+                        STATE.sessionStartTime = null;
+                    }
+                }
+            },
+
+            reset() {
+                timerActions.stop();
+                const timeParts = DOM.timer.textContent.split(':');
+                let minutes = parseInt(timeParts[0]) || 0;
+                let seconds = parseInt(timeParts[1]) || 0;
+                STATE.totalSeconds = minutes * 60 + seconds;
+                STATE.initialSeconds = STATE.totalSeconds;
+                DOM.timerProgress.style.background = `conic-gradient(var(--primary-blue) 0%, transparent 0%)`;
+                timerActions.updateDisplay();
+            },
+
+            updateDisplay() {
+                const minutes = Math.floor(Math.abs(STATE.totalSeconds) / 60);
+                const seconds = Math.abs(STATE.totalSeconds) % 60;
+                const sign = STATE.totalSeconds < 0 ? '-' : '';
+                DOM.timer.textContent = `${sign}${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (STATE.totalSeconds < 0) {
+                    DOM.timer.classList.add('negative-timer');
+                } else {
+                    DOM.timer.classList.remove('negative-timer');
+                    if (STATE.totalSeconds <= 60) {
+                        DOM.timer.style.color = '#f44336';
+                        DOM.timer.style.animation = 'pulse 1s infinite';
+                    } else if (STATE.totalSeconds <= 300) {
+                        DOM.timer.style.color = '#ff9800';
+                        DOM.timer.style.animation = 'none';
+                    } else {
+                        DOM.timer.style.color = STATE.isWorkMode ? 'var(--work-text)' : 'var(--break-text)';
+                        DOM.timer.style.animation = 'none';
+                    }
+                }
+            },
+
+            setQuickTime(minutes, seconds, workMode) {
+                timerActions.stop();
+                DOM.timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                STATE.totalSeconds = minutes * 60 + seconds;
+                STATE.initialSeconds = STATE.totalSeconds;
+                STATE.isWorkMode = workMode;
+                DOM.timerProgress.style.background = `conic-gradient(var(--primary-blue) 0%, transparent 0%)`;
+                timerActions.updateDisplay();
+                timerActions.updateModeIndicator();
+                
+                DOM.body.classList.remove('work-mode', 'break-mode');
+                DOM.body.classList.add(STATE.isWorkMode ? 'work-mode' : 'break-mode');
+                
+                if (STATE.isWorkMode) {
+                    DOM.leftAnimalGif.src = 'assets/working-dog-animation.gif';
+                    DOM.rightAnimalGif.src = 'assets/working-dog-animation.gif';
+                } else {
+                    DOM.leftAnimalGif.src = STATE.breakGif;
+                    DOM.rightAnimalGif.src = STATE.breakGif;
+                }
+            },
+
+            setMode(workMode) {
+                STATE.isWorkMode = workMode;
+                timerActions.updateModeIndicator();
+                
+                DOM.body.classList.remove('work-mode', 'break-mode');
+                DOM.body.classList.add(STATE.isWorkMode ? 'work-mode' : 'break-mode');
+                
+                if (STATE.isWorkMode) {
+                    DOM.leftAnimalGif.src = 'assets/working-dog-animation.gif';
+                    DOM.rightAnimalGif.src = 'assets/working-dog-animation.gif';
+                } else {
+                    DOM.leftAnimalGif.src = STATE.breakGif;
+                    DOM.rightAnimalGif.src = STATE.breakGif;
+                }
+            },
+
+            updateModeIndicator() {
+                if (STATE.isWorkMode) {
+                    DOM.modeIndicator.textContent = "Work Time";
+                    DOM.modeIndicator.className = "mode-indicator work-mode";
+                } else {
+                    DOM.modeIndicator.textContent = "Break Time";
+                    DOM.modeIndicator.className = "mode-indicator break-mode";
+                }
+            }
+        };
+
+        // ========== Project Tracking Functions ==========
+        const projectActions = {
+            addProject() {
+                const projectName = DOM.projectInput.value.trim();
+                if (projectName) {
+                    const project = {
+                        id: Date.now().toString(),
+                        name: projectName,
+                        pomodoros: 0,
+                        breaks: 0,
+                        workTime: 0,
+                        breakTime: 0,
+                        notes: ''
+                    };
+                    
+                    STATE.projects.push(project);
+                    this.saveProjects();
+                    this.renderProjects();
+                    DOM.projectInput.value = '';
+                }
+            },
+            
+            deleteProject(id) {
+                STATE.projects = STATE.projects.filter(project => project.id !== id);
+                if (STATE.currentProject === id) {
+                    STATE.currentProject = null;
+                }
+                this.saveProjects();
+                this.renderProjects();
+            },
+            
+            setCurrentProject(id) {
+                if (STATE.currentProject === id) {
+                    STATE.currentProject = null;
+                } else {
+                    STATE.currentProject = id;
+                }
+                this.renderProjects();
+            },
+            
+            saveProjects() {
+                localStorage.setItem('projects', JSON.stringify(STATE.projects));
+            },
+            
+            loadProjects() {
+                const savedProjects = localStorage.getItem('projects');
+                if (savedProjects) {
+                    STATE.projects = JSON.parse(savedProjects);
+                    this.renderProjects();
+                }
+            },
+            
+            renderProjects() {
+                DOM.projectList.innerHTML = '';
+                
+                const formatProjectTime = (seconds) => {
+                    const hours = Math.floor(seconds / 3600);
+                    const minutes = Math.floor((seconds % 3600) / 60);
+                    return `${hours}h ${minutes}m`;
                 };
                 
-                document.getElementById('doneList').appendChild(completedHeader);
-                const completedContent = document.createElement('div');
-                completedContent.className = `collapsible-content ${collapsedSubheadings[`${type}-${subheading}-completed`] ? 'collapsed' : ''}`;
+                STATE.projects.forEach(project => {
+                    const projectItem = document.createElement('div');
+                    projectItem.className = `project-item ${project.id === STATE.currentProject ? 'selected' : ''}`;
+                    projectItem.dataset.id = project.id;
+                    
+                    projectItem.innerHTML = `
+                        <div class="project-main-content">
+                            <div class="project-name editable" contenteditable="true">${project.name}</div>
+                            <div class="project-stats">
+                                <div class="project-stat">
+                                    <span>🍅</span>
+                                    <span class="editable" contenteditable="true">${project.pomodoros}</span>
+                                    <span class="project-time">${formatProjectTime(project.workTime || 0)}</span>
+                                </div>
+                                <div class="project-stat">
+                                    <span>☕</span>
+                                    <span class="editable" contenteditable="true">${project.breaks}</span>
+                                    <span class="project-time">${formatProjectTime(project.breakTime || 0)}</span>
+                                </div>
+                            </div>
+                            <div class="project-actions">
+                                <button class="project-action-btn" onclick="projectActions.setCurrentProject('${project.id}')">
+                                    ${project.id === STATE.currentProject ? 'Untrack' : 'Track'}
+                                </button>
+                                <button class="project-action-btn" onclick="projectActions.deleteProject('${project.id}')">Delete</button>
+                            </div>
+                        </div>
+                        <div class="project-notes-section">
+                            <button class="project-notes-toggle">Notes</button>
+                            <textarea class="project-notes" placeholder="Add notes about this project...">${project.notes || ''}</textarea>
+                        </div>
+                    `;
+                    
+                    DOM.projectList.appendChild(projectItem);
+                    
+                    const notesToggle = projectItem.querySelector('.project-notes-toggle');
+                    const notesTextarea = projectItem.querySelector('.project-notes');
+                    
+                    // Initialize notes as hidden
+                    notesTextarea.style.display = 'none';
+                    
+                    notesToggle.addEventListener('click', () => {
+                        const isExpanded = notesTextarea.style.display === 'block';
+                        notesTextarea.style.display = isExpanded ? 'none' : 'block';
+                        notesToggle.classList.toggle('expanded');
+                    });
+                    
+                    notesTextarea.addEventListener('blur', () => {
+                        project.notes = notesTextarea.value;
+                        this.saveProjects();
+                    });
+                    
+                    const nameEditable = projectItem.querySelector('.project-name');
+                    const pomodoroEditable = projectItem.querySelector('.project-stat:nth-child(1) .editable');
+                    const breakEditable = projectItem.querySelector('.project-stat:nth-child(2) .editable');
+                    
+                    nameEditable.addEventListener('blur', () => {
+                        project.name = nameEditable.textContent;
+                        this.saveProjects();
+                    });
+                    
+                    pomodoroEditable.addEventListener('blur', () => {
+                        const value = parseInt(pomodoroEditable.textContent) || 0;
+                        project.pomodoros = value;
+                        this.saveProjects();
+                    });
+                    
+                    breakEditable.addEventListener('blur', () => {
+                        const value = parseInt(breakEditable.textContent) || 0;
+                        project.breaks = value;
+                        this.saveProjects();
+                    });
+                });
+            }
+        };
+
+        // ========== Celebration Functions ==========
+        const celebrationActions = {
+            triggerCelebration() {
+                DOM.applauseSound.play();
+                this.createConfetti();
                 
-                completedItems.forEach(task => {
-                    const taskElement = createTaskElement(task);
-                    completedContent.appendChild(taskElement);
+                DOM.container.style.animation = 'pulse 0.5s 3';
+                setTimeout(() => {
+                    DOM.container.style.animation = '';
+                }, 1500);
+            },
+            
+            createConfetti() {
+                const confettiContainer = document.createElement('div');
+                confettiContainer.className = 'confetti-container';
+                confettiContainer.style.position = 'fixed';
+                confettiContainer.style.top = '0';
+                confettiContainer.style.left = '0';
+                confettiContainer.style.width = '100%';
+                confettiContainer.style.height = '100%';
+                confettiContainer.style.pointerEvents = 'none';
+                confettiContainer.style.zIndex = '1000';
+                
+                document.body.appendChild(confettiContainer);
+                
+                for (let i = 0; i < 100; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    
+                    const colors = ['#e91e63', '#4caf50', '#2196f3', '#ff9800', '#9c27b0'];
+                    const shapes = ['circle', 'square', 'triangle'];
+                    
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.opacity = '1';
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    
+                    const animationDuration = Math.random() * 3 + 2;
+                    confetti.style.animation = `fall ${animationDuration}s linear forwards`;
+                    
+                    const keyframes = `
+                        @keyframes fall {
+                            to {
+                                transform: translateY(100vh) rotate(${Math.random() * 360}deg);
+                                opacity: 0;
+                            }
+                        }
+                    `;
+                    
+                    if (!document.getElementById('confetti-keyframes')) {
+                        const style = document.createElement('style');
+                        style.id = 'confetti-keyframes';
+                        style.innerHTML = keyframes;
+                        document.head.appendChild(style);
+                    }
+                    
+                    confettiContainer.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, animationDuration * 1000);
+                }
+                
+                setTimeout(() => {
+                    confettiContainer.remove();
+                }, 3000);
+            }
+        };
+
+        // ========== Tracking Functions ==========
+        const trackingActions = {
+            updateDisplay() {
+                DOM.totalWorkDisplay.textContent = this.formatTime(STATE.totalWorkSeconds);
+                DOM.totalBreakDisplay.textContent = this.formatTime(STATE.totalBreakSeconds);
+            },
+
+            formatTime(totalSeconds) {
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            },
+
+            resetTracking() {
+                if (confirm('Are you sure you want to reset all tracking time?')) {
+                    STATE.totalWorkSeconds = 0;
+                    STATE.totalBreakSeconds = 0;
+                    this.updateDisplay();
+                    localStorage.setItem('totalWorkSeconds', '0');
+                    localStorage.setItem('totalBreakSeconds', '0');
+                }
+            }
+        };
+
+        // ========== Dropdown Menu Functions ==========
+        const dropdownActions = {
+            init() {
+                // DOM Elements
+                const menuBtn = document.getElementById('menuBtn');
+                const menuItems = document.getElementById('menuItems');
+                const panels = {
+                    info: document.getElementById('infoPanel'),
+                    productivity: document.getElementById('productivityPanel'),
+                    sounds: document.getElementById('soundsPanel'),
+                    music: document.getElementById('musicPanel'),
+                    rewards: document.getElementById('rewardsPanel'),
+                    donate: document.getElementById('donatePanel')
+                };
+                
+                // Close buttons
+                const closeBtns = {
+                    info: document.getElementById('closeInfo'),
+                    productivity: document.getElementById('closeProductivity'),
+                    sounds: document.getElementById('closeSounds'),
+                    music: document.getElementById('closeMusic'),
+                    rewards: document.getElementById('closeRewards'),
+                    donate: document.getElementById('closeDonate')
+                };
+                
+                // Audio Elements
+                const sounds = {
+                    rain: document.getElementById('rainSound'),
+                    forest: document.getElementById('forestSound'),
+                    waves: document.getElementById('wavesSound'),
+                    coffee: document.getElementById('coffeeSound'),
+                    whitenoise: document.getElementById('whitenoiseSound'),
+                    pinknoise: document.getElementById('pinknoiseSound'),
+                    brownnoise: document.getElementById('brownnoiseSound'),
+                    fan: document.getElementById('fanSound'),
+                    thunder: document.getElementById('thunderSound'),
+                    river: document.getElementById('riverSound'),
+                    birds: document.getElementById('birdsSound'),
+                    fireplace: document.getElementById('fireplaceSound'),
+                    city: document.getElementById('citySound'),
+                    wind: document.getElementById('windSound'),
+                    crickets: document.getElementById('cricketsSound'),
+                    waterfall: document.getElementById('waterfallSound'),
+                    library: document.getElementById('librarySound'),
+                    rainroof: document.getElementById('rainroofSound')
+                };
+                
+                let currentSound = null;
+                const volumeControl = document.getElementById('volumeControl');
+
+                // Toggle menu visibility
+                menuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    menuItems.classList.toggle('show');
                 });
                 
-                document.getElementById('doneList').appendChild(completedContent);
-            }
-        }
-
-        function moveSubheading(type, index, direction) {
-            if (direction === 'up' && index > 0) {
-                [taskSubheadings[index], taskSubheadings[index - 1]] = [taskSubheadings[index - 1], taskSubheadings[index]];
-            } else if (direction === 'down' && index < taskSubheadings.length - 1) {
-                [taskSubheadings[index], taskSubheadings[index + 1]] = [taskSubheadings[index + 1], taskSubheadings[index]];
-            }
-            
-            saveSubheadings(type);
-            renderSubheadings(type);
-        }
-
-        function updateSubheading(type, index, value) {
-            const oldValue = taskSubheadings[index];
-            taskSubheadings[index] = value;
-            
-            // Update all items with the old subheading
-            tasks.forEach(task => {
-                if (task.subheading === oldValue) {
-                    task.subheading = value;
-                }
-            });
-            saveTasks();
-            
-            saveSubheadings(type);
-            renderSubheadings(type);
-        }
-
-        function addSubheading(type) {
-            const inputId = `new${type.charAt(0).toUpperCase() + type.slice(1)}Subheading`;
-            const newSubheading = document.getElementById(inputId).value.trim();
-            
-            if (!newSubheading) return;
-            
-            if (!taskSubheadings.includes(newSubheading)) {
-                taskSubheadings.push(newSubheading);
-                document.getElementById(inputId).value = '';
-                saveSubheadings(type);
-                renderSubheadings(type);
-            }
-        }
-
-        function removeSubheading(type, index) {
-            if (taskSubheadings.length <= 1) return;
-            
-            if (!confirm(`Are you sure you want to delete the "${taskSubheadings[index]}" subheading? All items in this subheading will be moved to "${taskSubheadings[0]}"`)) {
-                return;
-            }
-            
-            // Move items from this subheading to the first subheading
-            const subheadingToRemove = taskSubheadings[index];
-            tasks.forEach(task => {
-                if (task.subheading === subheadingToRemove) {
-                    task.subheading = taskSubheadings[0];
-                }
-            });
-            saveTasks();
-            
-            // Remove from collapsed state tracking
-            const key = `${type}-${subheadingToRemove}`;
-            if (collapsedSubheadings[key]) {
-                delete collapsedSubheadings[key];
-            }
-            
-            taskSubheadings.splice(index, 1);
-            saveSubheadings(type);
-            renderSubheadings(type);
-        }
-
-        function saveSubheadings(type) {
-            localStorage.setItem('taskSubheadings', JSON.stringify(taskSubheadings));
-        }
-
-        // Star Rating System
-        function setupStarRating() {
-            const stars = document.querySelectorAll('#priorityStars i');
-            stars.forEach(star => {
-                star.addEventListener('click', () => {
-                    const value = parseInt(star.getAttribute('data-value'));
-                    selectedPriority = value;
-                    
-                    // Update stars display
-                    stars.forEach((s, index) => {
-                        if (index < value) {
-                            s.classList.add('active');
-                        } else {
-                            s.classList.remove('active');
+                // Close menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!menuBtn.contains(e.target)) {
+                        menuItems.classList.remove('show');
+                    }
+                });
+                
+                // Handle menu item clicks
+                document.querySelectorAll('.item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const panelName = item.getAttribute('data-panel');
+                        
+                        // Close all panels first
+                        Object.values(panels).forEach(panel => {
+                            panel.classList.remove('show');
+                        });
+                        
+                        // Show selected panel
+                        if (panels[panelName]) {
+                            panels[panelName].classList.add('show');
+                        }
+                        
+                        // Close the dropdown
+                        menuItems.classList.remove('show');
+                    });
+                });
+                
+                // Close panel buttons
+                Object.entries(closeBtns).forEach(([panelName, btn]) => {
+                    btn.addEventListener('click', () => {
+                        panels[panelName].classList.remove('show');
+                    });
+                });
+                
+                // Close panels when clicking outside
+                document.addEventListener('click', (e) => {
+                    Object.entries(panels).forEach(([panelName, panel]) => {
+                        if (!panel.contains(e.target) && !Array.from(document.querySelectorAll('.item')).some(item => 
+                            item.getAttribute('data-panel') === panelName && item.contains(e.target))) {
+                            panel.classList.remove('show');
                         }
                     });
                 });
-            });
-            
-            // Set up color picker
-            const colorOptions = document.querySelectorAll('#taskColorPicker .color-option');
-            colorOptions.forEach(option => {
-                option.addEventListener('click', () => {
-                    colorOptions.forEach(opt => opt.classList.remove('selected'));
-                    option.classList.add('selected');
-                    selectedColor = option.getAttribute('data-color');
+                
+                // Sound selection
+                document.querySelectorAll('.sound-option').forEach(option => {
+                    option.addEventListener('click', () => {
+                        const soundType = option.getAttribute('data-sound');
+                        
+                        // Stop any currently playing sound
+                        if (currentSound) {
+                            currentSound.pause();
+                            currentSound.currentTime = 0;
+                        }
+                        
+                        // Play selected sound
+                        currentSound = sounds[soundType];
+                        currentSound.volume = volumeControl.value;
+                        currentSound.play();
+                    });
                 });
-            });
-        }
-
-        // Task Functions
-        function addTask() {
-            const priorityText = 
-                selectedPriority >= 4 ? 'high' : 
-                selectedPriority >= 2 ? 'medium' : 'low';
-
-            const task = {
-                id: Date.now(),
-                title: document.getElementById('taskTitle').value.trim(),
-                start: document.getElementById('taskStart').value,
-                due: document.getElementById('taskDue').value,
-                priority: priorityText,
-                priorityValue: selectedPriority,
-                notes: document.getElementById('taskNotes').value,
-                currentStep: '',
-                completed: false,
-                created: new Date().toISOString(),
-                subheading: taskSubheadings[0],
-                color: selectedColor
-            };
-
-            if (!task.title) return;
-
-            tasks.push(task);
-            saveTasks();
-            renderTasks();
-            clearTaskForm();
-        }
-
-        function renderTasks() {
-            renderSubheadings('task');
-        }
-
-        function createTaskElement(task) {
-            const taskElement = document.createElement('div');
-            taskElement.className = `task-item priority-${task.priority} ${task.completed ? 'completed' : ''}`;
-            taskElement.setAttribute('data-id', task.id);
-            
-            // Calculate timeline progress if dates exist
-            let timelineHTML = '';
-            if (task.start && task.due) {
-                const progress = calculateTimelineProgress(task.start, task.due);
                 
-                // Determine color based on progress
-                let progressColor;
-                if (progress.percentage < 33) {
-                    progressColor = '#28a745'; // Green
-                } else if (progress.percentage < 66) {
-                    progressColor = '#ffc107'; // Yellow
-                } else {
-                    progressColor = '#dc3545'; // Red
-                }
-                
-                timelineHTML = `
-                    <div class="timeline-container">
-                        <div class="timeline-bar">
-                            <div class="timeline-progress" style="width: ${progress.percentage}%; background-color: ${progressColor}"></div>
-                        </div>
-                        <div class="timeline-dates">
-                            <span>${formatDate(task.due)}</span>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Create star rating for priority
-            let starsHTML = '';
-            for (let i = 1; i <= 5; i++) {
-                starsHTML += `<i class="fas fa-star ${i <= task.priorityValue ? 'active' : ''}" 
-                             onclick="updateTaskPriority(${task.id}, ${i})"></i>`;
-            }
-
-            // Subheading selector
-            const subheadingOptions = taskSubheadings.map(sh => 
-                `<option value="${sh}" ${task.subheading === sh ? 'selected' : ''}>${sh}</option>`
-            ).join('');
-
-            // Color picker for the task
-            const colors = ['#1a73e8', '#dc3545', '#28a745', '#ffc107', '#6f42c1'];
-            const colorOptions = colors.map(color => 
-                `<div class="color-option ${task.color === color ? 'selected' : ''}" 
-                      style="background-color: ${color}" 
-                      data-color="${color}"
-                      onclick="updateTaskColor(${task.id}, '${color}')"></div>`
-            ).join('');
-
-            taskElement.innerHTML = `
-                <div class="task-header">
-                    <span class="task-title" contenteditable="true" 
-                          oninput="updateTaskField(${task.id}, 'title', this.innerText)">
-                        ${task.title}
-                    </span>
-                    <div class="complete-checkbox">
-                        <input type="checkbox" id="complete-${task.id}" ${task.completed ? 'checked' : ''} 
-                               onchange="toggleTask(${task.id})">
-                        <label for="complete-${task.id}" class="complete-checkbox-label">Complete</label>
-                    </div>
-                    <div class="task-controls">
-                        <button class="delete-btn" onclick="confirmDelete('task', ${task.id})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="subheading-selector">
-                    <select onchange="updateTaskField(${task.id}, 'subheading', this.value)">
-                        ${subheadingOptions}
-                    </select>
-                </div>
-                <textarea class="current-step" placeholder="Current step..." 
-                       oninput="updateTaskField(${task.id}, 'currentStep', this.value); autoResizeTextarea(this)">${task.currentStep || ''}</textarea>
-                <div class="task-meta">
-                    <div class="task-meta-item">
-                        <span>Priority:</span>
-                        <div class="star-rating">
-                            ${starsHTML}
-                        </div>
-                    </div>
-                    <div class="task-meta-item">
-                        <span>Start:</span>
-                        <input type="date" value="${task.start}" 
-                               onchange="updateTaskField(${task.id}, 'start', this.value)">
-                    </div>
-                    <div class="task-meta-item">
-                        <span>Due:</span>
-                        <input type="date" value="${task.due}" 
-                               onchange="updateTaskField(${task.id}, 'due', this.value)">
-                    </div>
-                    <div class="task-meta-item">
-                        <span>Color:</span>
-                        <div class="color-picker">
-                            ${colorOptions}
-                        </div>
-                    </div>
-                    ${timelineHTML}
-                </div>
-                <div class="notes-header" onclick="toggleNotes(this)">
-                    Notes
-                </div>
-                <div class="notes-content">
-                    <textarea oninput="updateTaskField(${task.id}, 'notes', this.value)"
-                              style="width:100%; min-height: 120px;">${task.notes}</textarea>
-                </div>
-                <div class="move-buttons">
-                    <button onclick="moveTask(${task.id}, 'up')">↑</button>
-                    <button onclick="moveTask(${task.id}, 'down')">↓</button>
-                </div>
-            `;
-            
-            // Initialize auto-resize for the current step textarea
-            const currentStepTextarea = taskElement.querySelector('.current-step');
-            autoResizeTextarea(currentStepTextarea);
-            
-            return taskElement;
-        }
-
-        function calculateTimelineProgress(startDate, dueDate) {
-            const now = new Date();
-            const start = new Date(startDate);
-            const end = new Date(dueDate);
-            
-            // Ensure dates are valid
-            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-                return { percentage: 0, status: 'invalid' };
-            }
-            
-            const total = end - start;
-            const elapsed = now - start;
-            
-            let percentage = (elapsed / total) * 100;
-            
-            // Clamp between 0 and 100
-            percentage = Math.max(0, Math.min(100, percentage));
-            
-            let status = 'on-track';
-            if (now > end) {
-                status = 'overdue';
-            } else if (percentage > 80) {
-                status = 'nearing-deadline';
-            }
-            
-            return { percentage, status };
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            const options = { year: 'numeric', month: 'short', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString(undefined, options);
-        }
-
-        function updateTaskPriority(taskId, newPriority) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                task.priorityValue = newPriority;
-                task.priority = newPriority >= 4 ? 'high' : newPriority >= 2 ? 'medium' : 'low';
-                saveTasks();
-                renderTasks();
-            }
-        }
-
-        function updateTaskColor(taskId, color) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                task.color = color;
-                saveTasks();
-                renderTasks();
-            }
-        }
-
-        function toggleTask(id) {
-            const task = tasks.find(t => t.id === id);
-            if (task) {
-                task.completed = !task.completed;
-                saveTasks();
-                renderTasks();
-            }
-        }
-
-        function moveTask(id, direction) {
-            const index = tasks.findIndex(t => t.id === id);
-            if (direction === 'up' && index > 0) {
-                [tasks[index], tasks[index - 1]] = [tasks[index - 1], tasks[index]];
-            } else if (direction === 'down' && index < tasks.length - 1) {
-                [tasks[index], tasks[index + 1]] = [tasks[index + 1], tasks[index]];
-            }
-            saveTasks();
-            renderTasks();
-        }
-
-        // Common Functions
-        function confirmDelete(type, id) {
-            if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
-                deleteTask(id);
-            }
-        }
-
-        function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id);
-            saveTasks();
-            renderTasks();
-        }
-
-        function updateTaskField(id, field, value) {
-            const task = tasks.find(t => t.id === id);
-            if (task) {
-                task[field] = value;
-                saveTasks();
-                if (field === 'subheading') {
-                    renderTasks();
-                }
-            }
-        }
-
-        function toggleNotes(header) {
-            const content = header.nextElementSibling;
-            content.classList.toggle('expanded');
-        }
-
-        function searchTasks() {
-            const searchTerm = document.getElementById('taskSearch').value.toLowerCase();
-            const filtered = tasks.filter(t => 
-                t.title.toLowerCase().includes(searchTerm) ||
-                (t.notes && t.notes.toLowerCase().includes(searchTerm)) ||
-                (t.currentStep && t.currentStep.toLowerCase().includes(searchTerm))
-            );
-            
-            const tasksList = document.getElementById('tasksList');
-            tasksList.innerHTML = '<h3 class="current-header">Current Tasks</h3><div id="currentList"></div><h3 class="completed-header">Completed Tasks</h3><div id="doneList"></div>';
-            
-            // Group by subheading
-            const currentGrouped = {};
-            const completedGrouped = {};
-            
-            filtered.forEach(task => {
-                if (!task.completed) {
-                    if (!currentGrouped[task.subheading]) {
-                        currentGrouped[task.subheading] = [];
+                // Volume control
+                volumeControl.addEventListener('input', () => {
+                    const volume = volumeControl.value;
+                    if (currentSound) {
+                        currentSound.volume = volume;
                     }
-                    currentGrouped[task.subheading].push(task);
-                } else {
-                    if (!completedGrouped[task.subheading]) {
-                        completedGrouped[task.subheading] = [];
-                    }
-                    completedGrouped[task.subheading].push(task);
-                }
-            });
-            
-            // Render current tasks
-            for (const [subheading, items] of Object.entries(currentGrouped)) {
-                const subheadingElement = document.createElement('div');
-                subheadingElement.className = 'subheading';
-                subheadingElement.textContent = subheading;
-                document.getElementById('currentList').appendChild(subheadingElement);
-                
-                items.forEach(task => {
-                    const taskElement = createTaskElement(task);
-                    document.getElementById('currentList').appendChild(taskElement);
                 });
             }
-            
-            // Render completed tasks
-            for (const [subheading, items] of Object.entries(completedGrouped)) {
-                const subheadingElement = document.createElement('div');
-                subheadingElement.className = 'subheading';
-                subheadingElement.textContent = `${subheading} - Completed`;
-                document.getElementById('doneList').appendChild(subheadingElement);
-                
-                items.forEach(task => {
-                    const taskElement = createTaskElement(task);
-                    document.getElementById('doneList').appendChild(taskElement);
-                });
-            }
-        }
-
-        // Form Clearing
-        function clearTaskForm() {
-            document.getElementById('taskTitle').value = '';
-            document.getElementById('taskStart').value = '';
-            document.getElementById('taskDue').value = '';
-            document.getElementById('taskNotes').value = '';
-            // Reset star rating
-            selectedPriority = 1;
-            const stars = document.querySelectorAll('#priorityStars i');
-            stars.forEach((star, index) => {
-                if (index === 0) {
-                    star.classList.add('active');
-                } else {
-                    star.classList.remove('active');
-                }
-            });
-            // Reset color picker
-            selectedColor = '#1a73e8';
-            const colorOptions = document.querySelectorAll('#taskColorPicker .color-option');
-            colorOptions.forEach((option, index) => {
-                if (index === 0) {
-                    option.classList.add('selected');
-                } else {
-                    option.classList.remove('selected');
-                }
-            });
-        }
-
-        // Storage
-        function saveTasks() { localStorage.setItem('tasks', JSON.stringify(tasks)); }
-
-        // Initialization
-        window.onload = () => {
-            setupStarRating();
-            renderTasks();
-            
-            // Collapse all input sections by default
-            document.querySelectorAll('.input-section').forEach(section => {
-                section.classList.add('collapsed');
-            });
-            
-            document.querySelector('.menu-item:nth-child(1)').classList.add('active');
         };
+
+        // ========== Initialization ==========
+        function setupEventListeners() {
+            DOM.startButton.addEventListener('click', timerActions.start);
+            DOM.pauseButton.addEventListener('click', timerActions.pause);
+            DOM.stopButton.addEventListener('click', timerActions.stop);
+            DOM.resetButton.addEventListener('click', timerActions.reset);
+            DOM.work25Button.addEventListener('click', () => timerActions.setQuickTime(25, 0, true));
+            DOM.break5Button.addEventListener('click', () => timerActions.setQuickTime(5, 0, false));
+            DOM.break30Button.addEventListener('click', () => timerActions.setQuickTime(30, 0, false));
+            DOM.setWorkModeButton.addEventListener('click', () => timerActions.setMode(true));
+            DOM.setBreakModeButton.addEventListener('click', () => timerActions.setMode(false));
+            
+            DOM.resetTracking.addEventListener('click', trackingActions.resetTracking);
+            
+            DOM.addProjectBtn.addEventListener('click', projectActions.addProject.bind(projectActions));
+            DOM.projectInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    projectActions.addProject();
+                }
+            });
+
+            // Initialize dropdown menu
+            dropdownActions.init();
+        }
+
+        function init() {
+            setupEventListeners();
+            
+            // Load saved state
+            STATE.totalWorkSeconds = parseInt(localStorage.getItem('totalWorkSeconds')) || 0;
+            STATE.totalBreakSeconds = parseInt(localStorage.getItem('totalBreakSeconds')) || 0;
+            trackingActions.updateDisplay();
+            
+            projectActions.loadProjects();
+            timerActions.updateModeIndicator();
+            
+            // Set initial progress circle
+            DOM.timerProgress.style.background = `conic-gradient(var(--primary-blue) 0%, transparent 0%)`;
+        }
+
+        init();
     </script>
 </body>
 </html>
