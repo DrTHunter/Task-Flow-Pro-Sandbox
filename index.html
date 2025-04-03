@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tasks</title>
+    <title>Task Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -15,66 +15,16 @@
 
         body {
             background-color: #f5f7fa;
-            padding: 0;
-            display: flex;
             height: 100vh;
             overflow: hidden;
         }
 
-        .container {
-            flex: 1;
+        .content {
             background-color: white;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-        }
-
-        .tabs {
-            display: flex;
-            background-color: #1a73e8;
-            flex-wrap: wrap;
-            position: relative;
-        }
-
-        .tab-button {
-            padding: 12px 20px;
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .tab-button.active {
-            background-color: #1557b0;
-        }
-
-        .settings-button {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .tab-content {
-            display: none;
-            padding: 15px;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        .tab-content.active {
-            display: block;
         }
 
         .input-section {
@@ -87,6 +37,7 @@
             align-items: flex-end;
             border-bottom: 1px solid #ddd;
             padding-bottom: 15px;
+            margin: 15px;
         }
 
         .input-section.collapsed {
@@ -96,6 +47,27 @@
             visibility: hidden;
             border-bottom: none;
             padding-bottom: 0;
+        }
+
+        .wide-input-section {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .wide-input-section .input-group:first-child {
+            flex: 3;
+            min-width: 300px;
+        }
+
+        .wide-input-section .input-group:not(:first-child) {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .wide-input-section button {
+            margin-left: auto;
+            height: 36px;
         }
 
         .input-group {
@@ -138,7 +110,9 @@
             background-color: #f8f9fa;
             border-radius: 5px;
             padding: 10px;
-            margin-bottom: 15px;
+            margin: 15px;
+            flex: 1;
+            overflow-y: auto;
         }
 
         .task-item {
@@ -159,7 +133,6 @@
             background-color: #f8f9fa;
         }
 
-        /* UPDATED TASK STYLES - MODIFIED AS REQUESTED */
         .task-header {
             display: flex;
             align-items: center;
@@ -177,7 +150,7 @@
             padding: 5px;
             border: none;
             border-radius: 4px;
-            width: 65%; /* Reduced width by 35% */
+            width: 65%;
         }
 
         .complete-checkbox {
@@ -193,7 +166,7 @@
 
         .current-step {
             margin-top: 5px;
-            width: 65%; /* Reduced width by 35% */
+            width: 65%;
             min-height: 40px;
             max-height: 200px;
             padding: 5px;
@@ -205,7 +178,6 @@
             overflow-y: hidden;
             word-wrap: break-word;
         }
-        /* END OF UPDATED TASK STYLES */
 
         .task-meta {
             display: flex;
@@ -266,9 +238,8 @@
         }
 
         .search-container {
-            display: inline-flex;
-            flex-grow: 1;
-            margin-bottom: 0;
+            display: flex;
+            margin: 15px;
             align-items: center;
         }
 
@@ -391,7 +362,7 @@
         .new-subheading-bar {
             display: flex;
             gap: 5px;
-            margin: 10px 0;
+            margin: 10px 15px;
             height: 30px;
             background-color: #e0e0e0;
             padding: 5px 10px;
@@ -472,22 +443,26 @@
 
         @media (max-width: 768px) {
             body {
-                flex-direction: column;
                 height: auto;
             }
             
-            .container {
+            .content {
                 height: auto;
-            }
-            
-            .tab-button {
-                flex: 1;
-                padding: 10px;
-                font-size: 12px;
             }
             
             .input-section {
                 flex-direction: column;
+            }
+            
+            .wide-input-section .input-group:first-child,
+            .wide-input-section .input-group:not(:first-child) {
+                flex: 1 0 100%;
+                min-width: 100%;
+            }
+            
+            .wide-input-section button {
+                margin-left: 0;
+                width: 100%;
             }
             
             .task-meta {
@@ -505,7 +480,6 @@
                 width: 100%;
             }
             
-            /* Responsive adjustments for the modified task layout */
             .task-title {
                 width: 100% !important;
             }
@@ -523,33 +497,26 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="tabs">
-            <button class="tab-button active">
-                <i class="fas fa-tasks"></i> Tasks
-            </button>
-            <button class="settings-button" onclick="toggleSettingsMenu()">
-                <i class="fas fa-cog"></i>
-            </button>
-            <div class="settings-menu" id="settingsMenu">
-                <button class="reset-btn" onclick="resetAllData()">
-                    Reset All Data
-                </button>
-            </div>
-        </div>
-
-        <!-- Tasks Tab -->
-        <div id="tasks" class="tab-content active">
-            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+    <div class="content" id="content">
+        <div id="tasks-content">
+            <div style="display: flex; align-items: center; margin: 15px;">
                 <button class="new-item-btn" onclick="toggleInputs('tasks')">
                     <i class="fas fa-plus"></i> New Task
                 </button>
                 <div class="search-container">
                     <input type="text" class="search-bar" id="taskSearch" placeholder="Search tasks..." oninput="searchTasks()">
                 </div>
+                <button class="settings-button" onclick="toggleSettingsMenu()" style="margin-left: auto;">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <div class="settings-menu" id="settingsMenu">
+                    <button class="reset-btn" onclick="resetAllData()">
+                        Reset All Data
+                    </button>
+                </div>
             </div>
             
-            <div class="input-section collapsed">
+            <div class="input-section collapsed wide-input-section">
                 <div class="input-group">
                     <input type="text" id="taskTitle" placeholder="Task title">
                 </div>
@@ -624,8 +591,8 @@
 
         // Toggle input sections
         function toggleInputs(tab) {
-            const inputSection = document.querySelector(`#${tab} .input-section`);
-            const toggleBtn = document.querySelector(`#${tab} .new-item-btn`);
+            const inputSection = document.querySelector(`#${tab}-content .input-section`);
+            const toggleBtn = document.querySelector(`#${tab}-content .new-item-btn`);
             
             inputSection.classList.toggle('collapsed');
             
