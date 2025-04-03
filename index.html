@@ -930,20 +930,27 @@
         }
 
         function saveAllData() {
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            localStorage.setItem('taskSubheadings', JSON.stringify(taskSubheadings));
-            localStorage.setItem('collapsedSubheadings', JSON.stringify(collapsedSubheadings));
+            try {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                localStorage.setItem('taskSubheadings', JSON.stringify(taskSubheadings));
+                localStorage.setItem('collapsedSubheadings', JSON.stringify(collapsedSubheadings));
+            } catch (e) {
+                console.error('Failed to save data:', e);
+            }
         }
 
         // Subheading functions
         function renderSubheadings(type) {
+            console.log('Rendering subheadings with tasks:', tasks);
+            console.log('Subheadings:', taskSubheadings);
+            
             const listContainer = document.getElementById('tasksList');
             
             // Clear the containers
             listContainer.innerHTML = '<h3 class="current-header">Current Tasks</h3><div id="currentList"></div><h3 class="completed-header">Completed Tasks</h3><div id="doneList"></div>';
             
             taskSubheadings.forEach((subheading, index) => {
-                // Render items for this subheading in the list container
+                console.log('Processing subheading:', subheading);
                 renderItemsForSubheading(type, subheading, listContainer, index);
             });
         }
@@ -1461,7 +1468,7 @@
             // Render current tasks
             for (const [subheading, items] of Object.entries(currentGrouped)) {
                 const subheadingElement = document.createElement('div');
-                suzbheadingElement.className = 'subheading';
+                subheadingElement.className = 'subheading';
                 subheadingElement.textContent = subheading;
                 document.getElementById('currentList').appendChild(subheadingElement);
                 
@@ -1514,12 +1521,21 @@
         }
 
         // Storage
-        function saveTasks() { localStorage.setItem('tasks', JSON.stringify(tasks)); }
+        function saveTasks() { 
+            try {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            } catch (e) {
+                console.error('Failed to save tasks:', e);
+            }
+        }
 
         // Initialization
         window.onload = () => {
             setupStarRating();
             renderTasks();
+            
+            // Make sure we're showing the correct tab
+            showTab('tasks');
             
             // Collapse all input sections by default
             document.querySelectorAll('.input-section').forEach(section => {
