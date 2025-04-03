@@ -1067,12 +1067,18 @@
 
         function moveSubheading(type, index, direction) {
             if (direction === 'up' && index > 0) {
+                // Swap the subheadings
                 [taskSubheadings[index], taskSubheadings[index - 1]] = [taskSubheadings[index - 1], taskSubheadings[index]];
             } else if (direction === 'down' && index < taskSubheadings.length - 1) {
+                // Swap the subheadings
                 [taskSubheadings[index], taskSubheadings[index + 1]] = [taskSubheadings[index + 1], taskSubheadings[index]];
             }
             
+            // Save both the subheadings and tasks
             saveSubheadings(type);
+            saveTasks();
+            
+            // Re-render everything
             renderSubheadings(type);
         }
 
