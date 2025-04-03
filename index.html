@@ -318,19 +318,18 @@
             overflow: hidden;
         }
 
-        .current-step {
-            margin-top: 5px;
-            width: 65%;
-            min-height: 40px;
-            max-height: 200px;
-            padding: 5px;
+        .process-instructions {
+            width: 100%;
+            min-height: 120px;
+            padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            resize: none;
             font-size: 13px;
-            line-height: 1.4;
-            overflow-y: hidden;
+            white-space: pre-wrap;
             word-wrap: break-word;
+            overflow-y: auto;
+            background-color: white;
+            outline: none;
         }
 
         .task-meta {
@@ -683,7 +682,7 @@
                 width: 100%;
             }
             
-            .current-step {
+            .process-instructions {
                 width: 100% !important;
             }
         }
@@ -891,10 +890,10 @@
         let taskSubheadings = JSON.parse(localStorage.getItem('taskSubheadings')) || ['General'];
         let collapsedSubheadings = JSON.parse(localStorage.getItem('collapsedSubheadings')) || {};
 
-        // Auto-resize textarea function
-        function autoResizeTextarea(textarea) {
-            textarea.style.height = 'auto'; // Reset height
-            textarea.style.height = (textarea.scrollHeight) + 'px';
+        // Auto-resize div function
+        function autoResizeDiv(div) {
+            div.style.height = 'auto';
+            div.style.height = (div.scrollHeight) + 'px';
         }
 
         // Toggle settings menu
@@ -1462,7 +1461,7 @@
             // Render current tasks
             for (const [subheading, items] of Object.entries(currentGrouped)) {
                 const subheadingElement = document.createElement('div');
-                subheadingElement.className = 'subheading';
+                suzbheadingElement.className = 'subheading';
                 subheadingElement.textContent = subheading;
                 document.getElementById('currentList').appendChild(subheadingElement);
                 
